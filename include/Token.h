@@ -112,6 +112,18 @@ namespace ucc
 
 		void set_value(const std::string &value);
 	};
+
+	class NormalToken : public Token
+	{
+	private:
+		std::string value;
+	public:
+		NormalToken(TokenType token_type, std::string value);
+
+		const std::string &get_value() const;
+
+		void set_value(const std::string &value);
+	};
 }
 
 #endif //UNIVERSALCOMPILER_TOKEN_H

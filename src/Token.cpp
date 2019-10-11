@@ -76,4 +76,18 @@ namespace ucc
 		StringToken::value = value;
 	}
 
+	NormalToken::NormalToken(TokenType token_type, std::string value) : Token(token_type)
+	{
+		NormalToken::value = std::move(value);
+	}
+
+	const std::string &NormalToken::get_value() const
+	{
+		return value;
+	}
+
+	void NormalToken::set_value(const std::string &value)
+	{
+		NormalToken::value = value;
+	}
 }

@@ -56,19 +56,21 @@ void token_output(ucc::Token *token, std::ostream &output_file_stream)
 {
 	switch (token->get_type())
 	{
-		case ucc::TokenType::token_id :
-			output_file_stream << "IDENFR " << ((ucc::IdToken *) token)->get_value() << std::endl;
+		case TokenType::token_eof:
+			return;
+		case TokenType::token_id :
+			output_file_stream << "IDENFR " << ((IdToken *) token)->get_value() << std::endl;
 			break;
-		case ucc::TokenType::token_number :
-			output_file_stream << "INTCON " << ((ucc::NumToken *) token)->get_value() << std::endl;
+		case TokenType::token_number :
+			output_file_stream << "INTCON " << ((NumToken *) token)->get_value() << std::endl;
 			break;
-		case ucc::TokenType::token_cchar :
-			output_file_stream << "CHARCON " << ((ucc::CharToken *) token)->get_value() << std::endl;
+		case TokenType::token_cchar :
+			output_file_stream << "CHARCON " << ((CharToken *) token)->get_value() << std::endl;
 			break;
-		case ucc::TokenType::token_cstring :
-			output_file_stream << "STRCON " << ((ucc::StringToken *) token)->get_value() << std::endl;
+		case TokenType::token_cstring :
+			output_file_stream << "STRCON " << ((StringToken *) token)->get_value() << std::endl;
 			break;
 		default:
-			output_file_stream << token_map[token->get_type()] << std::endl;
+			output_file_stream << token_map[token->get_type()] << " " << ((NormalToken *) token)->get_value() << std::endl;
 	}
 }

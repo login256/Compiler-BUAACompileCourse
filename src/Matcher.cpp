@@ -94,11 +94,12 @@ namespace ucc
 				if (cur_pos_it == input_string.cend() || !(*cur_pos_it == 32 || *cur_pos_it == 33 || (*cur_pos_it >= 33 && *cur_pos_it <= 126)))
 				{
 					std::cerr << "Wrong!1";
+					while (1);
 					//wrong
 				}
 				*cur_pos_it++;
 			}
-			return new StringToken(std::string(begin_pos_it, cur_pos_it));
+			return new StringToken(std::string(begin_pos_it + 1, cur_pos_it - 1));
 		}
 		else if (*cur_pos_it == '\'')
 		{
@@ -108,7 +109,7 @@ namespace ucc
 			{
 				*cur_pos_it++;
 				*cur_pos_it++;
-				return new CharToken(std::string(begin_pos_it, cur_pos_it));
+				return new CharToken(std::string(begin_pos_it + 1, cur_pos_it - 1));
 			}
 			std::cerr << "Wrong!2";
 			//wrong
@@ -129,7 +130,7 @@ namespace ucc
 			//std::cout << "// " << str << std::endl;
 			if (reserved_to_token.find(str) != reserved_to_token.end())
 			{
-				return new Token(reserved_to_token.find(str)->second);
+				return new NormalToken(reserved_to_token.find(str)->second, str);
 			}
 			else
 			{
@@ -171,11 +172,13 @@ namespace ucc
 			if (cur_pos_it != input_string.cend() && symbol_to_token.find(std::string(begin_pos_it, cur_pos_it + 1)) != symbol_to_token.end())
 			{
 				*cur_pos_it++;
-				return new Token(symbol_to_token.find(std::string(begin_pos_it, cur_pos_it))->second);
+				std::string str(std::string(begin_pos_it, cur_pos_it));
+				return new NormalToken(symbol_to_token.find(str)->second, str);
 			}
 			else if (symbol_to_token.find(std::string(begin_pos_it, cur_pos_it)) != symbol_to_token.end())
 			{
-				return new Token(symbol_to_token.find(std::string(begin_pos_it, cur_pos_it))->second);
+				std::string str(std::string(begin_pos_it, cur_pos_it));
+				return new NormalToken(symbol_to_token.find(str)->second, str);
 			}
 
 		}
