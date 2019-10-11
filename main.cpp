@@ -1,7 +1,43 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include "include/Matcher.h"
+#include "include/init.h"
+#include "include/homework/scanning_homework.h"
 
-int main()
+int process_file(std::ifstream &input, std::ofstream &output)
 {
-	std::cout << "Have not finished" << std::endl;
+	std::string input_file_name;
+	input_file_name = "testfile.txt";
+	std::string output_file_name;
+	output_file_name = "output.txt";
+	input.open(input_file_name);
+	if (!input.is_open())
+	{
+		std::cerr << "Can't open input file!" << std::endl;
+		return -1;
+	}
+	output.open(output_file_name);
+	if (!output.is_open())
+	{
+		std::cerr << "Can't open output file!" << std::endl;
+		return -1;
+	}
+	return 0;
+}
+
+int main(int argc, char **args)
+{
+	std::ifstream input_stream;
+	std::ofstream output_stream;
+	if (process_file(input_stream, output_stream) != 0)
+	{
+		return -1;
+	}
+	std::string input_string((std::istreambuf_iterator<char>(input_stream)),
+							 std::istreambuf_iterator<char>());
+	ucc::Matcher matcher(ucc::data::res_to_token, ucc::data::sym_to_token, input_string);
+	do_first_pass(input_string, output_stream, matcher);
+	//do_first_pass(input_string, std::cout, matcher);
 	return 0;
 }
