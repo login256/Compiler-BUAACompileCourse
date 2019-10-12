@@ -21,7 +21,9 @@ namespace ucc
 
 
 	SymbolTable::SymbolTable()
-	{}
+	{
+		par = nullptr;
+	}
 
 	SymbolTable::SymbolTable(SymbolTable *par) : par(par)
 	{}
@@ -54,6 +56,14 @@ namespace ucc
 		{
 			// wrong;
 			std::cerr << "Add SymbolTable repeated!" << std::endl;
+		}
+	}
+
+	SymbolTable::~SymbolTable()
+	{
+		for (auto e : table)
+		{
+			delete e.second;
 		}
 	}
 

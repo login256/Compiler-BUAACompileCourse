@@ -2,18 +2,19 @@
 // Created by lyt on 2019/9/12.
 //
 
-#ifndef UNIVERSALCOMPILER_MATCHER_H
-#define UNIVERSALCOMPILER_MATCHER_H
+#ifndef UNIVERSALCOMPILER_LEXER_H
+#define UNIVERSALCOMPILER_LEXER_H
 
 #include <vector>
 #include <string>
 #include <map>
 #include <unordered_map>
+#include <memory>
 #include "Token.h"
 
 namespace ucc
 {
-	class Matcher
+	class Lexer
 	{
 
 	private:
@@ -26,13 +27,13 @@ namespace ucc
 		int cur_col;
 
 	public:
-		Matcher(
+		Lexer(
 				const std::map<std::string, TokenType> &res_to_token,
 				const std::map<std::string, TokenType> &sym_to_token,
 				const std::string &input_file_string
 		);
 
-		virtual ~Matcher();
+		virtual ~Lexer();
 
 		int get_cur_pos() const;
 
@@ -40,11 +41,11 @@ namespace ucc
 
 		int get_cur_col() const;
 
-		Token *get_next_token();
+		std::shared_ptr<Token> get_next_token();
 
 		bool is_eof();
 
 	};
 }
 
-#endif //UNIVERSALCOMPILER_MATCHER_H
+#endif //UNIVERSALCOMPILER_LEXER_H

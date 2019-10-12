@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "include/Matcher.h"
+#include "include/Lexer.h"
 #include "include/init.h"
 #include "include/homework/scanning_homework.h"
 
@@ -35,9 +35,7 @@ int main(int argc, char **args)
 		return -1;
 	}
 	std::string input_string((std::istreambuf_iterator<char>(input_stream)),
-							 std::istreambuf_iterator<char>());
-	ucc::Matcher matcher(ucc::data::res_to_token, ucc::data::sym_to_token, input_string);
-	do_first_pass(input_string, output_stream, matcher);
-	//do_first_pass(input_string, std::cout, matcher);
+	                         std::istreambuf_iterator<char>());
+	ucc::Lexer lexer(ucc::data::res_to_token, ucc::data::sym_to_token, input_string);
 	return 0;
 }

@@ -5,7 +5,7 @@
 #ifndef UNIVERSALCOMPILER_INIT_H
 #define UNIVERSALCOMPILER_INIT_H
 
-#include "Matcher.h"
+#include "Lexer.h"
 #include "Automaton.h"
 
 namespace ucc

@@ -50,11 +50,13 @@ namespace ucc
 		typedef std::unordered_map<std::string, SymbolTableEntry *> SymbolMap;
 	private:
 		SymbolMap table;
-		SymbolTable *par = nullptr;
+		SymbolTable *par;
 	public:
 		SymbolTable();
 
 		SymbolTable(SymbolTable *par);
+
+		virtual ~SymbolTable();
 
 		bool is_root();
 

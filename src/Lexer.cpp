@@ -4,12 +4,12 @@
 
 #include <cctype>
 #include <sstream>
-#include "../include/Matcher.h"
+#include "../include/Lexer.h"
 #include <iostream>
 
 namespace ucc
 {
-	Matcher::Matcher(
+	Lexer::Lexer(
 			const std::map<std::string, TokenType> &res_to_token,
 			const std::map<std::string, TokenType> &sym_to_token,
 			const std::string &input_file_string
@@ -24,24 +24,24 @@ namespace ucc
 		cur_col = 0;
 	}
 
-	Matcher::~Matcher()
+	Lexer::~Lexer()
 	{
 		delete (&reserved_to_token);
 		delete (&symbol_to_token);
 		delete (&input_string);
 	}
 
-	int Matcher::get_cur_pos() const
+	int Lexer::get_cur_pos() const
 	{
 		return cur_pos_it - input_string.cbegin();
 	}
 
-	int Matcher::get_cur_line() const
+	int Lexer::get_cur_line() const
 	{
 		return cur_line;
 	}
 
-	int Matcher::get_cur_col() const
+	int Lexer::get_cur_col() const
 	{
 		return cur_col;
 	}
@@ -66,13 +66,13 @@ namespace ucc
 		return is_dig(c) || is_alpha(c) || c == '+' || c == '-' || c == '*' || c == '/';
 	}
 
-	Token *Matcher::get_next_token()
+	std::shared_ptr<Token> Lexer::get_next_token()
 	{
 		while (true)
 		{
 			if (cur_pos_it == input_string.cend())
 			{
-				return new Token(TokenType::token_eof);
+				return std::make_shared<Token>(TokenType::token_eof);
 			}
 			if (!std::isspace(*cur_pos_it))
 			{
@@ -91,15 +91,17 @@ namespace ucc
 					*cur_pos_it++;
 					break;
 				}
-				if (cur_pos_it == input_string.cend() || !(*cur_pos_it == 32 || *cur_pos_it == 33 || (*cur_pos_it >= 33 && *cur_pos_it <= 126)))
+				if (cur_pos_it == input_string.cend() ||
+				    !(*cur_pos_it == 32 || *cur_pos_it == 33 || (*cur_pos_it >= 33 && *cur_pos_it <= 126)))
 				{
 					std::cerr << "Wrong!1";
-					while (1);
+					while (1)
+					{}
 					//wrong
 				}
 				*cur_pos_it++;
 			}
-			return new StringToken(std::string(begin_pos_it + 1, cur_pos_it - 1));
+			return std::make_shared<StringToken>(std::string(begin_pos_it + 1, cur_pos_it - 1));
 		}
 		else if (*cur_pos_it == '\'')
 		{
@@ -109,7 +111,7 @@ namespace ucc
 			{
 				*cur_pos_it++;
 				*cur_pos_it++;
-				return new CharToken(std::string(begin_pos_it + 1, cur_pos_it - 1));
+				return std::make_shared<CharToken>(std::string(begin_pos_it + 1, cur_pos_it - 1));
 			}
 			std::cerr << "Wrong!2";
 			//wrong
@@ -130,11 +132,11 @@ namespace ucc
 			//std::cout << "// " << str << std::endl;
 			if (reserved_to_token.find(str) != reserved_to_token.end())
 			{
-				return new NormalToken(reserved_to_token.find(str)->second, str);
+				return std::make_shared<NormalToken>(reserved_to_token.find(str)->second, str);
 			}
 			else
 			{
-				return new IdToken(str);
+				return std::make_shared<IdToken>(str);
 			}
 		}
 		else if (is_nozero_dig(*cur_pos_it))
@@ -153,7 +155,7 @@ namespace ucc
 			std::istringstream ist(str);
 			int v;
 			ist >> v;
-			return new NumToken(v);
+			return std::make_shared<NumToken>(v);
 		}
 		else if (*cur_pos_it == '0')
 		{
@@ -163,31 +165,32 @@ namespace ucc
 			std::istringstream ist(str);
 			int v;
 			ist >> v;
-			return new NumToken(v);
+			return std::make_shared<NumToken>(v);
 		}
 		else
 		{
 			auto begin_pos_it = cur_pos_it;
 			*cur_pos_it++;
-			if (cur_pos_it != input_string.cend() && symbol_to_token.find(std::string(begin_pos_it, cur_pos_it + 1)) != symbol_to_token.end())
+			if (cur_pos_it != input_string.cend() &&
+			    symbol_to_token.find(std::string(begin_pos_it, cur_pos_it + 1)) != symbol_to_token.end())
 			{
 				*cur_pos_it++;
 				std::string str(std::string(begin_pos_it, cur_pos_it));
-				return new NormalToken(symbol_to_token.find(str)->second, str);
+				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, str);
 			}
 			else if (symbol_to_token.find(std::string(begin_pos_it, cur_pos_it)) != symbol_to_token.end())
 			{
 				std::string str(std::string(begin_pos_it, cur_pos_it));
-				return new NormalToken(symbol_to_token.find(str)->second, str);
+				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, str);
 			}
-
 		}
 		std::cerr << "Wrong!3";
-		while (1);
+		while (1)
+		{}
 		//wrong
 	}
 
-	bool Matcher::is_eof()
+	bool Lexer::is_eof()
 	{
 		return cur_pos_it == input_string.cend();
 	}
