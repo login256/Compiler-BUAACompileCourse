@@ -68,8 +68,9 @@ namespace ucc
 	static void wrong_in_parser(std::string str)
 	{
 		std::cerr << str << std::endl;
-		while (1)
-		{}
+		//while (1)
+		//{}
+		exit(0);
 	}
 
 #define MUST_HAVE(v_v) \
@@ -172,7 +173,7 @@ namespace ucc
 			{
 				parse_void_func();
 			}
-			else if (IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_void))
+			else if (IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char))
 			{
 				parse_func();
 			}
@@ -343,12 +344,12 @@ namespace ucc
 			{
 				wrong_in_parser("array size 0");
 			}
-			parse_uint();
 			MUST_BE(TokenType::token_rbrackets);
 		}
 		cur_symbol_table->add(SymbolTableEntry(cur_id, type, data, tsize));
 		while (IS_TOKEN(TokenType::token_comma))
 		{
+			get_next();
 			cur_id = parse_id();
 			tsize = size;
 			type = SymbolType::varible;
@@ -361,7 +362,6 @@ namespace ucc
 				{
 					wrong_in_parser("array size 0");
 				}
-				parse_uint();
 				MUST_BE(TokenType::token_rbrackets);
 			}
 			cur_symbol_table->add(SymbolTableEntry(cur_id, type, data, tsize));
@@ -682,6 +682,7 @@ namespace ucc
 			}
 			case TokenType::token_for :
 			{
+				get_next();
 				MUST_BE(TokenType::token_lpar);
 				parse_id();
 				MUST_BE(TokenType::token_ass);
@@ -737,7 +738,7 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		parse_par_value_list();
 		MUST_BE(TokenType::token_rpar);
-		if (!can_be_void && entryp->data == SymbolData::data_void)
+		if (entryp->data == SymbolData::data_void)
 		{
 			output_func(true);
 		}
@@ -786,10 +787,12 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		MUST_HAVE(TokenType::token_id);
 		parse_id();
-		while (IS_TOKEN(TokenType::token_id))
+		while (IS_TOKEN(TokenType::token_comma))
 		{
+			get_next();
 			parse_id();
 		}
+		MUST_BE(TokenType::token_rpar);
 		output(SyntaxType::syntax_read_state);
 	}
 
@@ -841,7 +844,7 @@ namespace ucc
 			{
 				wrong_in_parser("no )");
 			}
-			buffer.pop();
+			get_next();
 		}
 		output(SyntaxType::syntax_return_state);
 	}

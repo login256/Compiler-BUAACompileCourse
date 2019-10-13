@@ -1,1 +1,1 @@
-7z u -tzip upload.zip -mmt "include/" "src/" "main.cpp" 
+7z u -tzip upload.zip -mmt "include/" "src/" "main.cpp"  "mytest.zip"

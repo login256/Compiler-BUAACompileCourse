@@ -61,11 +61,11 @@ void HomeworkGrammerOutputer::syntax_func_fucking_output(bool is_void)
 {
 	if (is_void)
 	{
-		output_stream << "<有返回值函数调用语句>" << std::endl;
+		output_stream << "<无返回值函数调用语句>" << std::endl;
 	}
 	else
 	{
-		output_stream << "<无返回值函数调用语句>" << std::endl;
+		output_stream << "<有返回值函数调用语句>" << std::endl;
 	}
 }
 
