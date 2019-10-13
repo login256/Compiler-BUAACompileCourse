@@ -13,6 +13,20 @@ namespace ucc
 	                                                                                     attributes(attributes)
 	{}
 
+
+	SymbolTableEntry::SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size,
+	                                   const std::vector<SymbolAttribute> &attributes) : id(id), type(type),
+	                                                                                     data(data),
+	                                                                                     size(size),
+	                                                                                     attributes(attributes)
+	{}
+
+	SymbolTableEntry::SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size) : id(id),
+	                                                                                                   type(type),
+	                                                                                                   data(data),
+	                                                                                                   size(size)
+	{}
+
 	SymbolTableEntry::SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size) : id(id),
 	                                                                                                        type(type),
 	                                                                                                        data(data),
@@ -21,11 +35,9 @@ namespace ucc
 
 
 	SymbolTable::SymbolTable()
-	{
-		par = nullptr;
-	}
+	{}
 
-	SymbolTable::SymbolTable(SymbolTable *par) : par(par)
+	SymbolTable::SymbolTable(const std::shared_ptr<SymbolTable> &par) : par(par)
 	{}
 
 	bool SymbolTable::is_root()
@@ -33,7 +45,7 @@ namespace ucc
 		return par == nullptr;
 	}
 
-	SymbolTableEntry *SymbolTable::find(std::string id)
+	SymbolTableEntry *SymbolTable::find(const std::string &id)
 	{
 		auto cur = table.find(id);
 		if (cur != table.end())
@@ -59,12 +71,31 @@ namespace ucc
 		}
 	}
 
+	void SymbolTable::add(SymbolTableEntry &&entry)
+	{
+		if (table.find(entry.id) == table.end())
+		{
+			table[entry.id] = new SymbolTableEntry(entry);
+		}
+		else
+		{
+			// wrong;
+			std::cerr << "Add SymbolTable repeated!" << std::endl;
+		}
+	}
+
 	SymbolTable::~SymbolTable()
 	{
-		for (auto e : table)
+		for (auto &e : table)
 		{
 			delete e.second;
 		}
 	}
+
+	const std::shared_ptr<SymbolTable> &SymbolTable::get_par() const
+	{
+		return par;
+	}
+
 
 }

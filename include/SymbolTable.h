@@ -7,7 +7,9 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <unordered_map>
+#include <bits/shared_ptr.h>
 
 namespace ucc
 {
@@ -38,10 +40,15 @@ namespace ucc
 		int size;
 		std::vector<SymbolAttribute> attributes;
 
-		SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size,
+		SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size,
 		                 const std::vector<SymbolAttribute> &attributes);
 
+		SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size);
+
 		SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size);
+
+		SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size,
+		                 const std::vector<SymbolAttribute> &attributes);
 	};
 
 
@@ -50,19 +57,22 @@ namespace ucc
 		typedef std::unordered_map<std::string, SymbolTableEntry *> SymbolMap;
 	private:
 		SymbolMap table;
-		SymbolTable *par;
+		std::shared_ptr<SymbolTable> par;
 	public:
 		SymbolTable();
 
-		SymbolTable(SymbolTable *par);
+		SymbolTable(const std::shared_ptr<SymbolTable> &par);
 
 		virtual ~SymbolTable();
 
 		bool is_root();
 
-		SymbolTableEntry *find(std::string id);
+		SymbolTableEntry *find(const std::string &id);
 
 		void add(const SymbolTableEntry &entry);
+		void add(SymbolTableEntry &&entry);
+
+		const std::shared_ptr<SymbolTable> &get_par() const;
 	};
 }
 
