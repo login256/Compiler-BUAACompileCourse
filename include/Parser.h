@@ -75,6 +75,8 @@ namespace ucc
 	public:
 		virtual void syntax_unit_output(ucc::SyntaxType type) = 0;
 
+		virtual void syntax_func_fucking_output(bool is_void) = 0;
+
 		virtual void token_output(std::shared_ptr<Token> token) = 0;
 	};
 
@@ -88,7 +90,11 @@ namespace ucc
 		std::shared_ptr<SymbolTable> cur_symbol_table;
 
 		void output(SyntaxType type);
+
 		void output(std::shared_ptr<Token> token);
+
+		void output_func(bool is_void);
+
 		void get_next();
 
 		void parse_add(); //<加法运算符>
@@ -102,6 +108,7 @@ namespace ucc
 		int parse_uint();    //<无符号整数>
 		int parse_int(); //<整数>
 		std::string parse_id();
+
 		void parse_declare_header();  //<声明头部>
 		void parse_var_declare();   //<变量说明>
 		void parse_var_define();  //<变量定义>
@@ -120,7 +127,7 @@ namespace ucc
 		void parse_con(); //<条件>
 		void parse_loop_state();  //<循环语句>
 		void parse_step();    //<步长>
-		void parse_func_call();   //<有返回值函数调用语句> <无返回值函数调用语句>
+		void parse_func_call(bool can_be_void = true);   //<有返回值函数调用语句> <无返回值函数调用语句>
 		void parse_par_value_list();  //<值参数表>
 		void parse_state_list();  //<语句列>
 		void parse_read_state();  //<读语句>
@@ -129,6 +136,8 @@ namespace ucc
 
 	public:
 		Parser(GrammerOutputer &outputer, Lexer &lexer);
+
+		void parse();
 	};
 }
 #endif //UNIVERSALCOMPILER_PARSER_H

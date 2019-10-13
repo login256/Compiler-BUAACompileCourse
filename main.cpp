@@ -4,6 +4,8 @@
 #include "include/Lexer.h"
 #include "include/init.h"
 #include "include/homework/scanning_homework.h"
+#include "include/Parser.h"
+#include "include/homework/syntactic_homework.h"
 
 int process_file(std::ifstream &input_stream, std::ofstream &output_stream)
 {
@@ -37,5 +39,9 @@ int main(int argc, char **args)
 	}
 	std::string input_string((std::istreambuf_iterator<char>(input_stream)), std::istreambuf_iterator<char>());
 	ucc::Lexer lexer(ucc::data::res_to_token, ucc::data::sym_to_token, input_string);
+	HomeworkGrammerOutputer homework_grammer_outputer(output_stream);
+	//HomeworkGrammerOutputer homework_grammer_outputer(std::cout);
+	ucc::Parser parser(homework_grammer_outputer, lexer);
+	parser.parse();
 	return 0;
 }

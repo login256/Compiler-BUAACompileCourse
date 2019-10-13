@@ -46,14 +46,26 @@ std::map<SyntaxType, std::string> HomeworkGrammerOutputer::type_to_output = {
 		{SyntaxType::syntax_return_state,   "<返回语句>"},
 };
 
-HomeworkGrammerOutputer::HomeworkGrammerOutputer(std::ofstream &output_stream) : output_stream(output_stream)
+HomeworkGrammerOutputer::HomeworkGrammerOutputer(std::ostream &output_stream) : output_stream(output_stream)
 {}
 
 void HomeworkGrammerOutputer::syntax_unit_output(ucc::SyntaxType type)
 {
 	if (type_to_output.find(type) != type_to_output.end())
 	{
-		output_stream << type_to_output[type];
+		output_stream << type_to_output[type] << std::endl;
+	}
+}
+
+void HomeworkGrammerOutputer::syntax_func_fucking_output(bool is_void)
+{
+	if (is_void)
+	{
+		output_stream << "<有返回值函数调用语句>" << std::endl;
+	}
+	else
+	{
+		output_stream << "<无返回值函数调用语句>" << std::endl;
 	}
 }
 

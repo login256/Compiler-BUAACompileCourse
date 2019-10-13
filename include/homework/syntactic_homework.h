@@ -8,6 +8,7 @@
 
 #include "../Parser.h"
 #include <fstream>
+#include <ostream>
 #include <map>
 #include <string>
 
@@ -15,11 +16,13 @@ class HomeworkGrammerOutputer : public ucc::GrammerOutputer
 {
 private:
 	static std::map<ucc::SyntaxType, std::string> type_to_output;
-	std::ofstream &output_stream;
+	std::ostream &output_stream;
 public:
-	HomeworkGrammerOutputer(std::ofstream &output_stream);
+	HomeworkGrammerOutputer(std::ostream &output_stream);
 
 	virtual void syntax_unit_output(ucc::SyntaxType type);
+
+	virtual void syntax_func_fucking_output(bool is_void);
 
 	void token_output(std::shared_ptr<ucc::Token> token) override;
 };

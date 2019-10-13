@@ -54,6 +54,11 @@ namespace ucc
 		outputer.token_output(token);
 	}
 
+	void Parser::output_func(bool is_void)
+	{
+		outputer.syntax_func_fucking_output(is_void);
+	}
+
 	void Parser::get_next()
 	{
 		auto re = buffer.pop();
@@ -247,7 +252,7 @@ namespace ucc
 
 	int Parser::parse_uint()
 	{
-		MUST_HAVE(TokenType::token_int);
+		MUST_HAVE(TokenType::token_number);
 		auto cur_num_token = std::static_pointer_cast<NumToken>(buffer.front());
 		get_next();
 		output(SyntaxType::syntax_uint);
@@ -275,6 +280,7 @@ namespace ucc
 	{
 		MUST_HAVE(TokenType::token_id);
 		auto cur_token = std::static_pointer_cast<IdToken>(buffer.front());
+		get_next();
 		output(SyntaxType::syntax_id);
 		return cur_token->get_value();
 	}
@@ -294,6 +300,7 @@ namespace ucc
 		{
 			wrong_in_parser("no int/char");
 		}
+		get_next();
 		cur_symbol_table->add(SymbolTableEntry(parse_id(), SymbolType::func, data, 0));
 		output(SyntaxType::syntax_declare_header);
 	}
@@ -302,7 +309,8 @@ namespace ucc
 	{
 		parse_var_define();
 		MUST_BE(TokenType::token_semi);
-		while (IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char))
+		while ((IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char)) &&
+		       buffer.at(2)->get_type() != TokenType::token_lpar)
 		{
 			parse_var_define();
 			MUST_BE(TokenType::token_semi);
@@ -425,10 +433,20 @@ namespace ucc
 
 	void Parser::parse_par_list()
 	{
-		while (IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char))
+		if (IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char))
 		{
 			auto data = parse_var_type();
 			auto cur_id = parse_id();
+			while (IS_TOKEN(TokenType::token_comma))
+			{
+				get_next();
+				if (!(IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char)))
+				{
+					wrong_in_parser("no int/char int par list");
+				}
+				data = parse_var_type();
+				cur_id = parse_id();
+			}
 		}
 		output(SyntaxType::syntax_par_list);
 	}
@@ -486,7 +504,7 @@ namespace ucc
 			{
 				if (buffer.at(1)->get_type() == TokenType::token_lpar)
 				{
-					parse_func_call();
+					parse_func_call(false);
 				}
 				else
 				{
@@ -509,7 +527,7 @@ namespace ucc
 			}
 			case TokenType::token_plus :
 			case TokenType::token_minus :
-			case TokenType::token_int:
+			case TokenType::token_number:
 			{
 				parse_int();
 				break;
@@ -590,40 +608,176 @@ namespace ucc
 
 	void Parser::parse_ass_state()
 	{
+		parse_id();
+		if (IS_TOKEN(TokenType::token_lbrackets))
+		{
+			get_next();
+			parse_exp();
+			MUST_BE(TokenType::token_rbrackets);
+
+		}
+		MUST_BE(TokenType::token_ass);
+		parse_exp();
+		output(SyntaxType::syntax_ass_state);
 	}
 
 	void Parser::parse_con_state()
 	{
-
+		MUST_BE(TokenType::token_if);
+		MUST_BE(TokenType::token_lpar);
+		parse_con();
+		MUST_BE(TokenType::token_rpar);
+		parse_state();
+		if (IS_TOKEN(TokenType::token_else))
+		{
+			get_next();
+			parse_state();
+		}
+		output(SyntaxType::syntax_con_state);
 	}
 
 	void Parser::parse_con()
 	{
-
+		parse_exp();
+		switch (buffer.front()->get_type())
+		{
+			case TokenType::token_les:
+			case TokenType::token_leq:
+			case TokenType::token_grt:
+			case TokenType::token_geq:
+			case TokenType::token_neq:
+			case TokenType::token_eql:
+			{
+				parse_rel();
+				parse_exp();
+				break;
+			}
+			default: break;
+		}
+		output(SyntaxType::syntax_con);
 	}
 
 	void Parser::parse_loop_state()
 	{
-
+		switch (buffer.front()->get_type())
+		{
+			case TokenType::token_while :
+			{
+				get_next();
+				MUST_BE(TokenType::token_lpar);
+				parse_con();
+				MUST_BE(TokenType::token_rpar);
+				parse_state();
+				break;
+			}
+			case TokenType::token_do :
+			{
+				get_next();
+				parse_state();
+				MUST_BE(TokenType::token_while);
+				MUST_BE(TokenType::token_lpar);
+				parse_con();
+				MUST_BE(TokenType::token_rpar);
+				break;
+			}
+			case TokenType::token_for :
+			{
+				MUST_BE(TokenType::token_lpar);
+				parse_id();
+				MUST_BE(TokenType::token_ass);
+				parse_exp();
+				MUST_BE(TokenType::token_semi);
+				parse_con();
+				MUST_BE(TokenType::token_semi);
+				parse_id();
+				MUST_BE(TokenType::token_ass);
+				parse_id();
+				int neg = 1;
+				if (IS_TOKEN(TokenType::token_plus))
+				{
+					neg = 1;
+				}
+				else if (IS_TOKEN(TokenType::token_minus))
+				{
+					neg = -1;
+				}
+				else
+				{
+					wrong_in_parser("no +/- in for");
+				}
+				get_next();
+				parse_step();
+				MUST_BE(TokenType::token_rpar);
+				parse_state();
+				break;
+			}
+			default: wrong_in_parser("no while for do");
+		}
+		output(SyntaxType::syntax_loop_state);
 	}
 
 	void Parser::parse_step()
 	{
-
+		parse_uint();
+		output(SyntaxType::syntax_step);
 	}
 
-	void Parser::parse_func_call()
+	void Parser::parse_func_call(bool can_be_void)
 	{
-
+		auto cur_id = parse_id();
+		auto entryp = cur_symbol_table->find(cur_id);
+		if (entryp == nullptr)
+		{
+			wrong_in_parser("can't find func");
+		}
+		if (!can_be_void && entryp->data == SymbolData::data_void)
+		{
+			wrong_in_parser("can't be void");
+		}
+		MUST_BE(TokenType::token_lpar);
+		parse_par_value_list();
+		MUST_BE(TokenType::token_rpar);
+		if (!can_be_void && entryp->data == SymbolData::data_void)
+		{
+			output_func(true);
+		}
+		else
+		{
+			output_func(false);
+		}
 	}
 
 	void Parser::parse_par_value_list()
 	{
-
+		switch (buffer.front()->get_type())
+		{
+			case TokenType::token_plus :
+			case TokenType::token_minus :
+			case TokenType::token_id :
+			case TokenType::token_lpar :
+			case TokenType::token_number :
+			case TokenType::token_cchar :
+			{
+				parse_exp();
+				while (IS_TOKEN(TokenType::token_comma))
+				{
+					get_next();
+					parse_exp();
+				}
+				break;
+			}
+			default: break;
+		}
+		output(SyntaxType::syntax_par_value_list);
 	}
 
-	void Parser::parse_state_list()
+	void Parser::parse_state_list() // must have a '}'
 	{
+		while (!IS_TOKEN(TokenType::token_rbrace))
+		{
+			parse_state();
+		}
+		output(SyntaxType::syntax_state_list);
 	}
 
 	void Parser::parse_read_state()
@@ -692,5 +846,8 @@ namespace ucc
 		output(SyntaxType::syntax_return_state);
 	}
 
-
+	void Parser::parse()
+	{
+		parse_program();
+	}
 }
