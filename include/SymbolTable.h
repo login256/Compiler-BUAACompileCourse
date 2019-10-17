@@ -9,7 +9,6 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
-#include <bits/shared_ptr.h>
 
 namespace ucc
 {
