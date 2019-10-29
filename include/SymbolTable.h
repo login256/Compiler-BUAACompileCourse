@@ -9,7 +9,6 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
-#include <bits/shared_ptr.h>
 
 namespace ucc
 {
@@ -39,16 +38,12 @@ namespace ucc
 		SymbolData data;
 		int size;
 		std::vector<SymbolAttribute> attributes;
+;
 
-		SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size,
-		                 const std::vector<SymbolAttribute> &attributes);
+		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size);
 
-		SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size);
-
-		SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size);
-
-		SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size,
-		                 const std::vector<SymbolAttribute> &attributes);
+		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size,
+						 const std::vector<SymbolAttribute> &attributes);
 	};
 
 

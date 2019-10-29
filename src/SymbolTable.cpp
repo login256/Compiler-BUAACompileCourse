@@ -7,30 +7,16 @@
 
 namespace ucc
 {
-	SymbolTableEntry::SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size,
-	                                   const std::vector<SymbolAttribute> &attributes) : id(id), type(type), data(data),
+	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size,
+									   const std::vector<SymbolAttribute> &attributes) : id(std::move(id)), type(type), data(data),
 	                                                                                     size(size),
 	                                                                                     attributes(attributes)
 	{}
 
-
-	SymbolTableEntry::SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size,
-	                                   const std::vector<SymbolAttribute> &attributes) : id(id), type(type),
-	                                                                                     data(data),
-	                                                                                     size(size),
-	                                                                                     attributes(attributes)
-	{}
-
-	SymbolTableEntry::SymbolTableEntry(std::string &&id, SymbolType type, SymbolData data, int size) : id(id),
-	                                                                                                   type(type),
-	                                                                                                   data(data),
-	                                                                                                   size(size)
-	{}
-
-	SymbolTableEntry::SymbolTableEntry(const std::string &id, SymbolType type, SymbolData data, int size) : id(id),
-	                                                                                                        type(type),
-	                                                                                                        data(data),
-	                                                                                                        size(size)
+	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size) : id(std::move(id)),
+																									 type(type),
+																									 data(data),
+																									 size(size)
 	{}
 
 

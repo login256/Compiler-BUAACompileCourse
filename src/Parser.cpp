@@ -602,6 +602,8 @@ namespace ucc
 				MUST_BE(TokenType::token_semi);
 				break;
 			}
+			default:
+				wrong_in_parser("wrong token in state");
 		}
 		output(SyntaxType::syntax_state);
 	}
