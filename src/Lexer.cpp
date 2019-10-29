@@ -66,6 +66,17 @@ namespace ucc
 		return is_dig(c) || is_alpha(c) || c == '+' || c == '-' || c == '*' || c == '/';
 	}
 
+	inline void Lexer::next_pos()
+	{
+		if (*cur_pos_it == '\n')
+		{
+			cur_line++;
+			cur_col = 0;
+		}
+		cur_col++;
+		cur_pos_it++;
+	}
+
 	std::shared_ptr<Token> Lexer::get_next_token()
 	{
 		while (true)
@@ -78,55 +89,64 @@ namespace ucc
 			{
 				break;
 			}
-			*cur_pos_it++;
+			next_pos();
 		}
 		if (*cur_pos_it == '"')
 		{
 			auto begin_pos_it = cur_pos_it;
-			cur_pos_it++;
+			next_pos();
 			while (true)
 			{
-				if (*cur_pos_it == '"')
+				if (cur_pos_it != input_string.cend() && *cur_pos_it == '"')
 				{
-					*cur_pos_it++;
+					next_pos();
 					break;
 				}
 				if (cur_pos_it == input_string.cend() ||
-				    !(*cur_pos_it == 32 || *cur_pos_it == 33 || (*cur_pos_it >= 33 && *cur_pos_it <= 126)))
+					!(*cur_pos_it == 32 || *cur_pos_it == 33 || (*cur_pos_it >= 33 && *cur_pos_it <= 126)))
 				{
 					std::cerr << "Wrong!1";
-					while (1)
-					{}
+					while (1) {}
 					//wrong
 				}
-				*cur_pos_it++;
+				next_pos();
 			}
 			return std::make_shared<StringToken>(std::string(begin_pos_it + 1, cur_pos_it - 1));
 		}
 		else if (*cur_pos_it == '\'')
 		{
 			auto begin_pos_it = cur_pos_it;
-			*cur_pos_it++;
-			if (cur_pos_it + 1 <= input_string.cend() && is_char(*cur_pos_it))
+			next_pos();
+			if (cur_pos_it != input_string.cend() && is_char(*cur_pos_it))
 			{
-				*cur_pos_it++;
-				*cur_pos_it++;
-				return std::make_shared<CharToken>(std::string(begin_pos_it + 1, cur_pos_it - 1));
+				next_pos();
 			}
-			std::cerr << "Wrong!2";
-			//wrong
+			else
+			{
+				//wrong
+			}
+			if (cur_pos_it != input_string.cend() && *cur_pos_it == '\'')
+			{
+				next_pos();
+			}
+			else
+			{
+				std::cerr << "Wrong!2";
+				//wrong
+			}
+			return std::make_shared<CharToken>(std::string(begin_pos_it + 1, cur_pos_it - 1));
 		}
 		else if (is_alpha(*cur_pos_it))
 		{
 			auto begin_pos_it = cur_pos_it;
-			cur_pos_it++;
+			next_pos();
 			while (true)
 			{
 				if (cur_pos_it == input_string.cend() || !(is_alpha(*cur_pos_it) || is_dig(*cur_pos_it)))
 				{
 					break;
 				}
-				cur_pos_it++;
+				next_pos();
 			}
 			std::string str(begin_pos_it, cur_pos_it);
 			//std::cout << "// " << str << std::endl;
@@ -142,14 +162,14 @@ namespace ucc
 		else if (is_nozero_dig(*cur_pos_it))
 		{
 			auto begin_pos_it = cur_pos_it;
-			cur_pos_it++;
+			next_pos();
 			while (true)
 			{
-				if (!is_dig(*cur_pos_it) || cur_pos_it == input_string.cend())
+				if ( cur_pos_it == input_string.cend() || !is_dig(*cur_pos_it))
 				{
 					break;
 				}
-				*cur_pos_it++;
+				next_pos();
 			}
 			std::string str(begin_pos_it, cur_pos_it);
 			std::istringstream ist(str);
@@ -160,7 +180,7 @@ namespace ucc
 		else if (*cur_pos_it == '0')
 		{
 			auto begin_pos_it = cur_pos_it;
-			cur_pos_it++;
+			next_pos();
 			std::string str(begin_pos_it, cur_pos_it);
 			std::istringstream ist(str);
 			int v;
@@ -170,11 +190,11 @@ namespace ucc
 		else
 		{
 			auto begin_pos_it = cur_pos_it;
-			*cur_pos_it++;
+			next_pos();
 			if (cur_pos_it != input_string.cend() &&
-			    symbol_to_token.find(std::string(begin_pos_it, cur_pos_it + 1)) != symbol_to_token.end())
+				symbol_to_token.find(std::string(begin_pos_it, cur_pos_it + 1)) != symbol_to_token.end())
 			{
-				*cur_pos_it++;
+				next_pos();
 				std::string str(std::string(begin_pos_it, cur_pos_it));
 				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, str);
 			}
@@ -185,8 +205,7 @@ namespace ucc
 			}
 		}
 		std::cerr << "Wrong!3";
-		while (1)
-		{}
+		while (1) {}
 		//wrong
 	}
 
