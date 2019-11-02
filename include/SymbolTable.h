@@ -38,7 +38,6 @@ namespace ucc
 		SymbolData data;
 		int size;
 		std::vector<SymbolAttribute> attributes;
-;
 
 		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size);
 
@@ -65,6 +64,7 @@ namespace ucc
 		SymbolTableEntry *find(const std::string &id);
 
 		void add(const SymbolTableEntry &entry);
+
 		void add(SymbolTableEntry &&entry);
 
 		const std::shared_ptr<SymbolTable> &get_par() const;

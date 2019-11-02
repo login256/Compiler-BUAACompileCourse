@@ -83,7 +83,7 @@ namespace ucc
 		{
 			if (cur_pos_it == input_string.cend())
 			{
-				return std::make_shared<Token>(TokenType::token_eof);
+				return std::make_shared<Token>(TokenType::token_eof, get_cur_line());
 			}
 			if (!std::isspace(*cur_pos_it))
 			{
@@ -111,7 +111,7 @@ namespace ucc
 				}
 				next_pos();
 			}
-			return std::make_shared<StringToken>(std::string(begin_pos_it + 1, cur_pos_it - 1));
+			return std::make_shared<StringToken>(get_cur_line(), std::string(begin_pos_it + 1, cur_pos_it - 1));
 		}
 		else if (*cur_pos_it == '\'')
 		{
@@ -134,7 +134,7 @@ namespace ucc
 				std::cerr << "Wrong!2";
 				//wrong
 			}
-			return std::make_shared<CharToken>(std::string(begin_pos_it + 1, cur_pos_it - 1));
+			return std::make_shared<CharToken>(get_cur_line(), std::string(begin_pos_it + 1, cur_pos_it - 1));
 		}
 		else if (is_alpha(*cur_pos_it))
 		{
@@ -152,11 +152,11 @@ namespace ucc
 			//std::cout << "// " << str << std::endl;
 			if (reserved_to_token.find(str) != reserved_to_token.end())
 			{
-				return std::make_shared<NormalToken>(reserved_to_token.find(str)->second, str);
+				return std::make_shared<NormalToken>(reserved_to_token.find(str)->second, get_cur_line(), str);
 			}
 			else
 			{
-				return std::make_shared<IdToken>(str);
+				return std::make_shared<IdToken>(get_cur_line(), str);
 			}
 		}
 		else if (is_nozero_dig(*cur_pos_it))
@@ -165,7 +165,7 @@ namespace ucc
 			next_pos();
 			while (true)
 			{
-				if ( cur_pos_it == input_string.cend() || !is_dig(*cur_pos_it))
+				if (cur_pos_it == input_string.cend() || !is_dig(*cur_pos_it))
 				{
 					break;
 				}
@@ -175,7 +175,7 @@ namespace ucc
 			std::istringstream ist(str);
 			int v;
 			ist >> v;
-			return std::make_shared<NumToken>(v);
+			return std::make_shared<NumToken>(get_cur_line(), v);
 		}
 		else if (*cur_pos_it == '0')
 		{
@@ -185,7 +185,7 @@ namespace ucc
 			std::istringstream ist(str);
 			int v;
 			ist >> v;
-			return std::make_shared<NumToken>(v);
+			return std::make_shared<NumToken>(get_cur_line(), v);
 		}
 		else
 		{
@@ -196,12 +196,12 @@ namespace ucc
 			{
 				next_pos();
 				std::string str(std::string(begin_pos_it, cur_pos_it));
-				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, str);
+				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, get_cur_line(), str);
 			}
 			else if (symbol_to_token.find(std::string(begin_pos_it, cur_pos_it)) != symbol_to_token.end())
 			{
 				std::string str(std::string(begin_pos_it, cur_pos_it));
-				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, str);
+				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, get_cur_line(), str);
 			}
 		}
 		std::cerr << "Wrong!3";

@@ -80,6 +80,16 @@ namespace ucc
 		virtual void token_output(std::shared_ptr<Token> token) = 0;
 	};
 
+	class DefaultGrammerOutputer : public GrammerOutputer
+	{
+	public:
+		void syntax_unit_output(ucc::SyntaxType type) override;
+
+		void syntax_func_fucking_output(bool is_void) override;
+
+		void token_output(std::shared_ptr<Token> token) override;
+	};
+
 	class Parser
 	{
 	private:

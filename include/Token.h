@@ -56,10 +56,11 @@ namespace ucc
 	{
 	private:
 		TokenType type;
+		int line;
 	public:
-		explicit Token(TokenType type);
+		explicit Token(TokenType type, int line);
 
-		void set_type(TokenType type);
+		int get_line() const;
 
 		TokenType get_type() const;
 
@@ -70,7 +71,7 @@ namespace ucc
 	private:
 		int value;
 	public:
-		NumToken(int value);
+		NumToken(int line, int value);
 
 		int get_value() const;
 
@@ -82,7 +83,7 @@ namespace ucc
 	private:
 		std::string value;
 	public:
-		CharToken(std::string value);
+		CharToken(int line, std::string value);
 
 		const std::string &get_value() const;
 
@@ -94,7 +95,7 @@ namespace ucc
 	private:
 		std::string value;
 	public:
-		IdToken(std::string value);
+		IdToken(int line, std::string value);
 
 		const std::string &get_value() const;
 
@@ -106,7 +107,7 @@ namespace ucc
 	private:
 		std::string value;
 	public:
-		StringToken(std::string value);
+		StringToken(int line, std::string value);
 
 		const std::string &get_value() const;
 
@@ -118,7 +119,7 @@ namespace ucc
 	private:
 		std::string value;
 	public:
-		NormalToken(TokenType token_type, std::string value);
+		NormalToken(TokenType token_type, int line, std::string value);
 
 		const std::string &get_value() const;
 

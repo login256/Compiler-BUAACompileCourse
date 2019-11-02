@@ -855,4 +855,16 @@ namespace ucc
 	{
 		parse_program();
 	}
+
+	void DefaultGrammerOutputer::syntax_unit_output(ucc::SyntaxType type)
+	{
+	}
+
+	void DefaultGrammerOutputer::syntax_func_fucking_output(bool is_void)
+	{
+	}
+
+	void DefaultGrammerOutputer::token_output(std::shared_ptr<Token> token)
+	{
+	}
 }
