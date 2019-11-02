@@ -5,6 +5,7 @@
 #include <cctype>
 #include <sstream>
 #include "../include/Lexer.h"
+#include "../include/homework/error_homework.h"
 #include <iostream>
 
 namespace ucc
@@ -102,12 +103,19 @@ namespace ucc
 					next_pos();
 					break;
 				}
+				if (cur_pos_it != input_string.cend() && *cur_pos_it == '\n')
+				{
+					error_handler(Error(ErrorType::bad_char, get_cur_line()));
+					if (*(cur_pos_it - 1) == ';')
+					{
+						cur_pos_it--; // fuck !!!!!!!!!!!!!! 傻逼出题人!!!!!!!!!!!!!!!!!!!!!
+					}
+					return std::make_shared<StringToken>(get_cur_line(), std::string(begin_pos_it + 1, cur_pos_it));
+				}
 				if (cur_pos_it == input_string.cend() ||
 					!(*cur_pos_it == 32 || *cur_pos_it == 33 || (*cur_pos_it >= 33 && *cur_pos_it <= 126)))
 				{
-					std::cerr << "Wrong!1";
-					while (1) {}
-					//wrong
+					error_handler(Error(ErrorType::bad_char, get_cur_line()));
 				}
 				next_pos();
 			}
@@ -123,7 +131,8 @@ namespace ucc
 			}
 			else
 			{
-				//wrong
+				error_handler(Error(ErrorType::bad_char, get_cur_line()));
+				next_pos();
 			}
 			if (cur_pos_it != input_string.cend() && *cur_pos_it == '\'')
 			{
@@ -131,8 +140,8 @@ namespace ucc
 			}
 			else
 			{
-				std::cerr << "Wrong!2";
-				//wrong
+				error_handler(Error(ErrorType::bad_char, get_cur_line()));
+				return std::make_shared<CharToken>(get_cur_line(), std::string(begin_pos_it + 1, cur_pos_it));
 			}
 			return std::make_shared<CharToken>(get_cur_line(), std::string(begin_pos_it + 1, cur_pos_it - 1));
 		}
@@ -204,9 +213,9 @@ namespace ucc
 				return std::make_shared<NormalToken>(symbol_to_token.find(str)->second, get_cur_line(), str);
 			}
 		}
-		std::cerr << "Wrong!3";
-		while (1) {}
-		//wrong
+		next_pos();
+		error_handler(Error(ErrorType::bad_char, get_cur_line()));
+		return get_next_token();
 	}
 
 	bool Lexer::is_eof()

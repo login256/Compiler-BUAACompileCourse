@@ -35,13 +35,15 @@ namespace ucc
 		ErrorType error_type;
 		int line;
 		int col;
+
+		Error(ErrorType error_type, int line);
 	};
 
 	bool operator<(const Error &fi, const Error &se);
 
 	std::ofstream &operator<<(std::ofstream &os, const Error &error);
 
-	void error_handler(const Error &error);
+	void error_handler(Error error);
 
 	void print_errors(std::ofstream &error_file);
 }

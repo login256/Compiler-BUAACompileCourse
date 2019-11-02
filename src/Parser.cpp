@@ -10,7 +10,7 @@ namespace ucc
 {
 	TokenBuffer::TokenBuffer(Lexer &lexer) : lexer(lexer)
 	{
-		last = std::make_shared<Token>(TokenType::token_eof);
+		last = std::make_shared<Token>(TokenType::token_eof, -1);
 	}
 
 	std::shared_ptr<Token> TokenBuffer::at(int pos)

@@ -38,11 +38,13 @@ std::ofstream &ucc::operator<<(std::ofstream &os, const Error &error)
 	return os;
 }
 
+Error::Error(ErrorType error_type, int line) : error_type(error_type), line(line) {}
+
 static std::set<Error> errors;
 
-void ucc::error_handler(const Error &error)
+void ucc::error_handler(Error error)
 {
-	errors.insert(error);
+	errors.insert(std::move(error));
 }
 
 void ucc::print_errors(std::ofstream &error_file)
@@ -52,3 +54,4 @@ void ucc::print_errors(std::ofstream &error_file)
 		error_file << e;
 	}
 }
+
