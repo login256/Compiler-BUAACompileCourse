@@ -8,7 +8,10 @@
 
 namespace ucc
 {
-	TokenBuffer::TokenBuffer(Lexer &lexer) : lexer(lexer) {}
+	TokenBuffer::TokenBuffer(Lexer &lexer) : lexer(lexer)
+	{
+		last = std::make_shared<Token>(TokenType::token_eof);
+	}
 
 	std::shared_ptr<Token> TokenBuffer::at(int pos)
 	{
@@ -31,6 +34,7 @@ namespace ucc
 			que.push_back(lexer.get_next_token());
 		}
 		auto re = que.front();
+		last = re;
 		que.pop_front();
 		return re;
 	}
@@ -38,6 +42,11 @@ namespace ucc
 	void TokenBuffer::back_up(const std::shared_ptr<Token> &token)
 	{
 		que.push_front(token);
+	}
+
+	std::shared_ptr<Token> TokenBuffer::get_last() const
+	{
+		return last;
 	}
 
 	Parser::Parser(GrammerOutputer &outputer, Lexer &lexer) : outputer(outputer), buffer(lexer) {}
