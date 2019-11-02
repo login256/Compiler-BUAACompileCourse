@@ -8,8 +8,7 @@
 
 namespace ucc
 {
-	TokenBuffer::TokenBuffer(Lexer &lexer) : lexer(lexer)
-	{}
+	TokenBuffer::TokenBuffer(Lexer &lexer) : lexer(lexer) {}
 
 	std::shared_ptr<Token> TokenBuffer::at(int pos)
 	{
@@ -41,8 +40,7 @@ namespace ucc
 		que.push_front(token);
 	}
 
-	Parser::Parser(GrammerOutputer &outputer, Lexer &lexer) : outputer(outputer), buffer(lexer)
-	{}
+	Parser::Parser(GrammerOutputer &outputer, Lexer &lexer) : outputer(outputer), buffer(lexer) {}
 
 	void Parser::output(SyntaxType type)
 	{
@@ -137,7 +135,8 @@ namespace ucc
 				get_next();
 				break;
 			}
-			default: wrong_in_parser("no rel");
+			default:
+				wrong_in_parser("no rel");
 		}
 		output(syntax_rel);
 	}
@@ -162,8 +161,8 @@ namespace ucc
 			parse_const_declare();
 		}
 		if (buffer.at(2)->get_type() == TokenType::token_comma ||
-		    buffer.at(2)->get_type() == TokenType::token_lbrackets ||
-		    buffer.at(2)->get_type() == TokenType::token_semi)
+			buffer.at(2)->get_type() == TokenType::token_lbrackets ||
+			buffer.at(2)->get_type() == TokenType::token_semi)
 		{
 			parse_var_declare();
 		}
@@ -220,10 +219,11 @@ namespace ucc
 				size = 1;
 				break;
 			}
-			default: wrong_in_parser("no int/char int const define");
+			default:
+				wrong_in_parser("no int/char int const define");
 		}
 		cur_symbol_table->add(SymbolTableEntry(parse_id(), SymbolType::varible, data_type, size,
-		                                       {SymbolAttribute::att_const}));
+											   {SymbolAttribute::att_const}));
 		MUST_BE(TokenType::token_ass);
 		if (data_type == data_int)
 		{
@@ -237,7 +237,7 @@ namespace ucc
 		{
 			get_next();
 			cur_symbol_table->add(SymbolTableEntry(parse_id(), SymbolType::varible, data_type, size,
-			                                       {SymbolAttribute::att_const}));
+												   {SymbolAttribute::att_const}));
 			MUST_BE(TokenType::token_ass);
 			if (data_type == data_int)
 			{
@@ -311,7 +311,7 @@ namespace ucc
 		parse_var_define();
 		MUST_BE(TokenType::token_semi);
 		while ((IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char)) &&
-		       buffer.at(2)->get_type() != TokenType::token_lpar)
+			   buffer.at(2)->get_type() != TokenType::token_lpar)
 		{
 			parse_var_define();
 			MUST_BE(TokenType::token_semi);
@@ -537,7 +537,8 @@ namespace ucc
 				parse_char();
 				break;
 			}
-			default: wrong_in_parser("wrong fact");
+			default:
+				wrong_in_parser("wrong fact");
 		}
 		output(SyntaxType::syntax_fact);
 	}
@@ -654,7 +655,8 @@ namespace ucc
 				parse_exp();
 				break;
 			}
-			default: break;
+			default:
+				break;
 		}
 		output(SyntaxType::syntax_con);
 	}
@@ -714,7 +716,8 @@ namespace ucc
 				parse_state();
 				break;
 			}
-			default: wrong_in_parser("no while for do");
+			default:
+				wrong_in_parser("no while for do");
 		}
 		output(SyntaxType::syntax_loop_state);
 	}
@@ -769,7 +772,8 @@ namespace ucc
 				}
 				break;
 			}
-			default: break;
+			default:
+				break;
 		}
 		output(SyntaxType::syntax_par_value_list);
 	}
