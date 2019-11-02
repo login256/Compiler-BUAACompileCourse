@@ -2,9 +2,14 @@
 // Created by lyt on 2019/10/12.
 //
 
-#include "../../include/homework/syntactic_homework.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "../../include/Lexer.h"
+#include "../../include/init.h"
 #include "../../include/homework/scanning_homework.h"
 #include "../../include/Parser.h"
+#include "../../include/homework/syntactic_homework.h"
 
 using namespace ucc;
 
@@ -46,8 +51,7 @@ std::map<SyntaxType, std::string> HomeworkGrammerOutputer::type_to_output = {
 		{SyntaxType::syntax_return_state,   "<返回语句>"},
 };
 
-HomeworkGrammerOutputer::HomeworkGrammerOutputer(std::ostream &output_stream) : output_stream(output_stream)
-{}
+HomeworkGrammerOutputer::HomeworkGrammerOutputer(std::ostream &output_stream) : output_stream(output_stream) {}
 
 void HomeworkGrammerOutputer::syntax_unit_output(ucc::SyntaxType type)
 {
@@ -72,4 +76,44 @@ void HomeworkGrammerOutputer::syntax_func_fucking_output(bool is_void)
 void HomeworkGrammerOutputer::token_output(std::shared_ptr<Token> token)
 {
 	::token_output(token, output_stream);
+}
+
+
+static int process_file(std::ifstream &input_stream, std::ofstream &output_stream)
+{
+	std::string input_file_name;
+	input_file_name = "testfile.txt";
+	std::string output_file_name;
+	output_file_name = "output.txt";
+	input_stream.open(input_file_name);
+	if (!input_stream.is_open())
+	{
+		std::cerr << "Can't open input file!" << std::endl;
+		return -1;
+	}
+	output_stream.open(output_file_name);
+	if (!output_stream.is_open())
+	{
+		std::cerr << "Can't open output file!" << std::endl;
+		return -1;
+	}
+	return 0;
+}
+
+
+int syntactic_homework::syntactic_main()
+{
+	std::ifstream input_stream;
+	std::ofstream output_stream;
+	if (process_file(input_stream, output_stream) != 0)
+	{
+		return -1;
+	}
+	std::string input_string((std::istreambuf_iterator<char>(input_stream)), std::istreambuf_iterator<char>());
+	ucc::Lexer lexer(ucc::data::res_to_token, ucc::data::sym_to_token, input_string);
+	HomeworkGrammerOutputer homework_grammer_outputer(output_stream);
+	//HomeworkGrammerOutputer homework_grammer_outputer(std::cout);
+	ucc::Parser parser(homework_grammer_outputer, lexer);
+	parser.parse();
+	return 0;
 }

@@ -27,4 +27,9 @@ public:
 	virtual void token_output(std::shared_ptr<ucc::Token> token) override;
 };
 
+namespace syntactic_homework
+{
+	int syntactic_main();
+}
+
 #endif //UNIVERSALCOMPILER_SYNTACTIC_HOMEWORK_H
