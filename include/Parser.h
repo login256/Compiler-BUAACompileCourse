@@ -11,6 +11,7 @@
 #include "Token.h"
 #include "Lexer.h"
 #include "SymbolTable.h"
+#include "Error.h"
 
 namespace ucc
 {
@@ -102,6 +103,8 @@ namespace ucc
 
 		std::shared_ptr<SymbolTable> cur_symbol_table;
 
+		std::map<std::string, std::vector<SymbolData>> func_args;
+
 		void output(SyntaxType type);
 
 		void output(std::shared_ptr<Token> token);
@@ -122,16 +125,16 @@ namespace ucc
 		int parse_int(); //<整数>
 		std::string parse_id();
 
-		void parse_declare_header();  //<声明头部>
+		std::string parse_declare_header();  //<声明头部>
 		void parse_var_declare();   //<变量说明>
 		void parse_var_define();  //<变量定义>
 		SymbolData parse_var_type();    //<类型标识符>
 		void parse_func();    //<有返回值函数定义>
 		void parse_void_func();   //<无返回值函数定义>
-		void parse_compound();    //<复合语句>
-		void parse_par_list();    //<参数表>
+		void parse_compound(bool new_symbol_table);    //<复合语句>
+		void parse_par_list(std::vector<SymbolData> &par_list);    //<参数表>
 		void parse_main_func();   //<主函数>
-		void parse_exp(); //<表达式>
+		SymbolData parse_exp(); //<表达式>
 		void parse_term();    //<项>
 		void parse_fact();    //<因子>
 		void parse_state();    //<语句>
@@ -146,6 +149,10 @@ namespace ucc
 		void parse_read_state();  //<读语句>
 		void parse_write_state(); //<写语句>
 		void parse_return_state();    //<返回语句>
+
+		std::map<std::string, std::vector<SymbolData>> func_para;
+
+		inline void must_and_error(TokenType token_type, ErrorType error_type, bool front);
 
 	public:
 		Parser(GrammerOutputer &outputer, Lexer &lexer);

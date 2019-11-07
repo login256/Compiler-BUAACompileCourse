@@ -7,39 +7,22 @@
 
 #include <map>
 #include <string>
-#include <fstream>
+#include <vector>
+#include <stack>
+#include "../SymbolTable.h"
+#include "../Error.h"
 
 namespace ucc
 {
-	enum ErrorType
+	class ErrorData
 	{
-		bad_char,    //"a"
-		id_redefine,    //"b"
-		undefined_id,    //"c"
-		func_arg_bad,    //"d"
-		func_type_bad,    //"e"
-		bad_in_cond,    //"f"
-		void_bad_return,    //"g"
-		no_bad_return,    //"h"
-		index_bad,    //"i"
-		const_var_changed,    //"j"
-		should_be_semi,    //"k"
-		should_be_rpar,    //"l"
-		should_be_rbac,    //"m"
-		no_while,    //"n"
-		const_define_bad,    //"o"
-		other_error,    //"?"
+	public:
+		static std::stack<bool> is_char_exp;
+		static bool has_void_return;
+		static bool has_char_return;
+		static bool has_int_return;
+		static std::vector<SymbolData> cur_func_args;
 	};
-	struct Error
-	{
-		ErrorType error_type;
-		int line;
-		int col;
-
-		Error(ErrorType error_type, int line);
-	};
-
-	bool operator<(const Error &fi, const Error &se);
 
 	std::ofstream &operator<<(std::ofstream &os, const Error &error);
 
@@ -47,6 +30,8 @@ namespace ucc
 
 	void print_errors(std::ofstream &error_file);
 }
+
+int error_main();
 
 
 #endif //UNIVERSALCOMPILER_ERROR_HOMEWORK_H

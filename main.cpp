@@ -1,6 +1,6 @@
-#include "include/homework/syntactic_homework.h"
+#include "include/homework/error_homework.h"
 
 int main(int argc, char **args)
 {
-	syntactic_homework::syntactic_main();
+	error_main();
 }

@@ -63,9 +63,9 @@ namespace ucc
 
 		SymbolTableEntry *find(const std::string &id);
 
-		void add(const SymbolTableEntry &entry);
+		bool add(const SymbolTableEntry &entry);
 
-		void add(SymbolTableEntry &&entry);
+		bool add(SymbolTableEntry &&entry);
 
 		const std::shared_ptr<SymbolTable> &get_par() const;
 	};

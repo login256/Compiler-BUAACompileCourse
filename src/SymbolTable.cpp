@@ -4,27 +4,24 @@
 
 #include <iostream>
 #include "../include/SymbolTable.h"
+#include "../include/homework/error_homework.h"
 
 namespace ucc
 {
 	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size,
 									   const std::vector<SymbolAttribute> &attributes) : id(std::move(id)), type(type), data(data),
-	                                                                                     size(size),
-	                                                                                     attributes(attributes)
-	{}
+																						 size(size),
+																						 attributes(attributes) {}
 
 	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size) : id(std::move(id)),
 																									 type(type),
 																									 data(data),
-																									 size(size)
-	{}
+																									 size(size) {}
 
 
-	SymbolTable::SymbolTable()
-	{}
+	SymbolTable::SymbolTable() {}
 
-	SymbolTable::SymbolTable(const std::shared_ptr<SymbolTable> &par) : par(par)
-	{}
+	SymbolTable::SymbolTable(const std::shared_ptr<SymbolTable> &par) : par(par) {}
 
 	bool SymbolTable::is_root()
 	{
@@ -44,7 +41,7 @@ namespace ucc
 		}
 	}
 
-	void SymbolTable::add(const SymbolTableEntry &entry)
+	bool SymbolTable::add(const SymbolTableEntry &entry)
 	{
 		if (table.find(entry.id) == table.end())
 		{
@@ -52,22 +49,27 @@ namespace ucc
 		}
 		else
 		{
+			return false;
 			// wrong;
-			std::cerr << "Add SymbolTable repeated!" << std::endl;
+			//std::cerr << "Add SymbolTable repeated!" << std::endl;
 		}
+		return true;
 	}
 
-	void SymbolTable::add(SymbolTableEntry &&entry)
+	bool SymbolTable::add(SymbolTableEntry &&entry)
 	{
 		if (table.find(entry.id) == table.end())
 		{
-			table[entry.id] = new SymbolTableEntry(entry);
+			std::string id = entry.id;
+			table[id] = new SymbolTableEntry(std::move(entry));
 		}
 		else
 		{
+			return false;
 			// wrong;
-			std::cerr << "Add SymbolTable repeated!" << std::endl;
+			//std::cerr << "Add SymbolTable repeated!" << std::endl;
 		}
+		return true;
 	}
 
 	SymbolTable::~SymbolTable()
