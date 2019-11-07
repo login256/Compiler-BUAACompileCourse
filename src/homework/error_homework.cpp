@@ -18,6 +18,7 @@ bool ErrorData::has_void_return;
 bool ErrorData::has_char_return;
 bool ErrorData::has_int_return;
 std::vector<SymbolData> ErrorData::cur_func_args;
+SymbolData ErrorData::cur_func_data_type;
 
 static std::map<ErrorType, std::string> ErrorToString = {
 		{ErrorType::bad_char,          "a"},

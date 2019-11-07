@@ -22,6 +22,7 @@ namespace ucc
 		static bool has_char_return;
 		static bool has_int_return;
 		static std::vector<SymbolData> cur_func_args;
+		static SymbolData cur_func_data_type;
 	};
 
 	std::ofstream &operator<<(std::ofstream &os, const Error &error);

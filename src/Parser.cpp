@@ -500,6 +500,9 @@ namespace ucc
 		int line = buffer.front()->get_line();
 #endif
 		std::string id = parse_declare_header();
+#ifdef SEMANTICERROR
+		ErrorData::cur_func_data_type = cur_symbol_table->find(id)->data;
+#endif
 		cur_symbol_table = std::make_shared<SymbolTable>(cur_symbol_table);
 		MUST_BE(TokenType::token_lpar);
 		parse_par_list(func_args[id]);
@@ -511,8 +514,7 @@ namespace ucc
 		output(SyntaxType::syntax_func);
 #ifdef SEMANTICERROR
 		auto data_type = cur_symbol_table->find(id)->data;
-		if (ErrorData::has_void_return || (ErrorData::has_char_return && data_type == SymbolData::data_int) ||
-			(ErrorData::has_int_return && data_type == SymbolData::data_char))
+		if (!ErrorData::has_void_return && ErrorData::has_int_return && ErrorData::has_char_return)
 		{
 			error_handler(Error(ErrorType::no_bad_return, line));
 		}
@@ -526,6 +528,7 @@ namespace ucc
 		ErrorData::has_char_return = false;
 		ErrorData::has_int_return = false;
 		int line = buffer.front()->get_line();
+		ErrorData::cur_func_data_type = SymbolData::data_void;
 #endif
 		MUST_BE(TokenType::token_void);
 		std::string cur_id = parse_id();
@@ -544,10 +547,12 @@ namespace ucc
 		cur_symbol_table = cur_symbol_table->get_par();
 		output(SyntaxType::syntax_void_func);
 #ifdef SEMANTICERROR
-		if (!ErrorData::has_void_return || ErrorData::has_char_return || ErrorData::has_int_return)
+		/*
+		if (ErrorData::has_char_return || ErrorData::has_int_return)
 		{
 			error_handler(Error(ErrorType::void_bad_return, line));
 		}
+		*/
 #endif
 	}
 
@@ -1162,6 +1167,14 @@ namespace ucc
 			{
 				ErrorData::has_int_return = true;
 			}
+			if (ErrorData::cur_func_data_type == SymbolData::data_void)
+			{
+				error_handler(Error(ErrorType::void_bad_return, buffer.get_last()->get_line()));
+			}
+			else if (ErrorData::cur_func_data_type != exp_type)
+			{
+				error_handler(Error(ErrorType::no_bad_return, buffer.get_last()->get_line()));
+			}
 #endif
 			must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
 		}
@@ -1169,6 +1182,10 @@ namespace ucc
 		else
 		{
 			ErrorData::has_void_return = true;
+			if (ErrorData::cur_func_data_type != SymbolData::data_void)
+			{
+				error_handler(Error(ErrorType::void_bad_return, buffer.get_last()->get_line()));
+			}
 		}
 #endif
 		output(SyntaxType::syntax_return_state);
