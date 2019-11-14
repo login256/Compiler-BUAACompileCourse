@@ -9,7 +9,7 @@
 #include "../include/homework/error_homework.h"
 
 
-#define SEMANTICERROR
+//#define SEMANTICERROR
 
 namespace ucc
 {
@@ -1041,9 +1041,7 @@ namespace ucc
 
 	void Parser::parse_par_value_list()
 	{
-#ifdef SEMANTICERROR
 		int cnt = 0;
-#endif
 		switch (buffer.front()->get_type())
 		{
 			case TokenType::token_plus :
