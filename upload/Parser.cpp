@@ -1278,7 +1278,6 @@ namespace ucc
 						is_char = true;
 					}
 				}
-				// 有 bug, 数组，函数调用
 				ir_list->push_back(std::make_shared<IrWrite>(var, is_char));
 			}
 		}
