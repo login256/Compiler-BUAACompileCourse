@@ -2,7 +2,7 @@
 // Created by lyt on 2019/11/2.
 //
 
-#include "../../include/homework/error_homework.h"
+#include "include/homework/error_homework.h"
 #include "../../include/Lexer.h"
 #include "../../include/init.h"
 #include <iostream>

@@ -2,7 +2,7 @@
 // Created by lyt on 2019/9/24.
 //
 
-#include "../include/init.h"
+#include "include/init.h"
 #include <map>
 
 namespace ucc

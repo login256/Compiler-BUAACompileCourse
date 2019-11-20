@@ -2,7 +2,7 @@
 // Created by lyt on 2019/9/27.
 //
 
-#include "../include/Automaton.h"
+#include "include/Automaton.h"
 
 namespace ucc
 {

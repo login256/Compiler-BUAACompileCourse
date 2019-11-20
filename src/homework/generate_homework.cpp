@@ -4,10 +4,10 @@
 
 #include <fstream>
 #include <iostream>
-#include "../../include/ToMips.h"
-#include "../../include/homework/generate_homework.h"
-#include "../../include/homework/syntactic_homework.h"
-#include "../../include/init.h"
+#include "include/ToMips.h"
+#include "include/homework/generate_homework.h"
+#include "include/homework/syntactic_homework.h"
+#include "include/init.h"
 
 using ucc::mips_output_stream;
 

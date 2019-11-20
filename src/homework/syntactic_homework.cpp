@@ -5,11 +5,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "../../include/Lexer.h"
-#include "../../include/init.h"
-#include "../../include/homework/scanning_homework.h"
-#include "../../include/Parser.h"
-#include "../../include/homework/syntactic_homework.h"
+#include "include/Lexer.h"
+#include "include/init.h"
+#include "include/homework/scanning_homework.h"
+#include "include/Parser.h"
+#include "include/homework/syntactic_homework.h"
 
 using namespace ucc;
 

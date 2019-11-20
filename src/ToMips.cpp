@@ -3,7 +3,7 @@
 //
 
 
-#include "../include/ToMips.h"
+#include "include/ToMips.h"
 #include <iostream>
 
 namespace ucc

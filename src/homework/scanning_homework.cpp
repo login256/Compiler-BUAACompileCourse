@@ -2,8 +2,8 @@
 // Created by lyt on 2019/9/24.
 //
 #include <string>
-#include "../../include/homework/scanning_homework.h"
-#include "../../include/Lexer.h"
+#include "include/homework/scanning_homework.h"
+#include "include/Lexer.h"
 
 using namespace ucc;
 

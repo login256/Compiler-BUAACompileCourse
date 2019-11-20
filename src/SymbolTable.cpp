@@ -3,8 +3,8 @@
 //
 
 #include <iostream>
-#include "../include/SymbolTable.h"
-#include "../include/homework/error_homework.h"
+#include "include/SymbolTable.h"
+#include "include/homework/error_homework.h"
 
 namespace ucc
 {

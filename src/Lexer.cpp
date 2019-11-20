@@ -4,8 +4,8 @@
 
 #include <cctype>
 #include <sstream>
-#include "../include/Lexer.h"
-#include "../include/homework/error_homework.h"
+#include "include/Lexer.h"
+#include "include/homework/error_homework.h"
 #include <iostream>
 
 namespace ucc

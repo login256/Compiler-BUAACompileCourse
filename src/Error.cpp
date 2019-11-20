@@ -2,7 +2,7 @@
 // Created by lyt on 2019/11/7.
 //
 
-#include "../include/Error.h"
+#include "include/Error.h"
 
 namespace ucc
 {

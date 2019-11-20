@@ -4,9 +4,9 @@
 #include <memory>
 #include <iostream>
 #include <set>
-#include "../include/Parser.h"
-#include "../include/Token.h"
-#include "../include/homework/error_homework.h"
+#include "include/Parser.h"
+#include "include/Token.h"
+#include "include/homework/error_homework.h"
 
 
 //#define SEMANTICERROR

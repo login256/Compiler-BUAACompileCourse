@@ -2,7 +2,7 @@
 // Created by lyt on 2019/9/12.
 //
 
-#include "../include/Token.h"
+#include "include/Token.h"
 
 namespace ucc
 {

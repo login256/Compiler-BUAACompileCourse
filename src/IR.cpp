@@ -2,7 +2,7 @@
 // Created by lyt on 2019/11/15.
 //
 
-#include "../include/IR.h"
+#include "include/IR.h"
 
 namespace ucc
 {
