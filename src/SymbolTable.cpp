@@ -28,7 +28,7 @@ namespace ucc
 		return par == nullptr;
 	}
 
-	SymbolTableEntry *SymbolTable::find(const std::string &id)
+	std::shared_ptr<SymbolTableEntry> SymbolTable::find(const std::string &id)
 	{
 		auto cur = table.find(id);
 		if (cur != table.end())
@@ -45,7 +45,7 @@ namespace ucc
 	{
 		if (table.find(entry.id) == table.end())
 		{
-			table[entry.id] = new SymbolTableEntry(entry);
+			table[entry.id] = std::make_shared<SymbolTableEntry>(entry);
 		}
 		else
 		{
@@ -61,7 +61,7 @@ namespace ucc
 		if (table.find(entry.id) == table.end())
 		{
 			std::string id = entry.id;
-			table[id] = new SymbolTableEntry(std::move(entry));
+			table[id] = std::make_shared<SymbolTableEntry>(std::move(entry));
 		}
 		else
 		{
@@ -72,17 +72,14 @@ namespace ucc
 		return true;
 	}
 
-	SymbolTable::~SymbolTable()
-	{
-		for (auto &e : table)
-		{
-			delete e.second;
-		}
-	}
-
 	const std::shared_ptr<SymbolTable> &SymbolTable::get_par() const
 	{
 		return par;
+	}
+
+	const SymbolTable::SymbolMap &SymbolTable::get_table() const
+	{
+		return table;
 	}
 
 

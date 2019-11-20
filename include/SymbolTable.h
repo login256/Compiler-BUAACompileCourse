@@ -38,6 +38,7 @@ namespace ucc
 		SymbolData data;
 		int size;
 		std::vector<SymbolAttribute> attributes;
+		unsigned int address = 0;
 
 		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size);
 
@@ -48,7 +49,7 @@ namespace ucc
 
 	class SymbolTable
 	{
-		typedef std::unordered_map<std::string, SymbolTableEntry *> SymbolMap;
+		typedef std::unordered_map<std::string, std::shared_ptr<SymbolTableEntry>> SymbolMap;
 	private:
 		SymbolMap table;
 		std::shared_ptr<SymbolTable> par;
@@ -57,17 +58,17 @@ namespace ucc
 
 		SymbolTable(const std::shared_ptr<SymbolTable> &par);
 
-		virtual ~SymbolTable();
-
 		bool is_root();
 
-		SymbolTableEntry *find(const std::string &id);
+		std::shared_ptr<SymbolTableEntry> find(const std::string &id);
 
 		bool add(const SymbolTableEntry &entry);
 
 		bool add(SymbolTableEntry &&entry);
 
 		const std::shared_ptr<SymbolTable> &get_par() const;
+
+		const SymbolMap &get_table() const;
 	};
 }
 

@@ -12,6 +12,7 @@
 #include "Lexer.h"
 #include "SymbolTable.h"
 #include "Error.h"
+#include "IR.h"
 
 namespace ucc
 {
@@ -104,6 +105,7 @@ namespace ucc
 		std::shared_ptr<SymbolTable> cur_symbol_table;
 
 		std::map<std::string, std::vector<SymbolData>> func_args;
+		std::map<std::string, std::vector<std::string>> func_args_id;
 
 		void output(SyntaxType type);
 
@@ -113,11 +115,11 @@ namespace ucc
 
 		void get_next();
 
-		void parse_add(); //<加法运算符>
-		void parse_mul(); //<乘法运算符>
-		void parse_rel(); //<关系运算符>
-		void parse_char();    //<字符>
-		void parse_string();  //<字符串>
+		IrOp parse_add(); //<加法运算符>
+		IrOp parse_mul(); //<乘法运算符>
+		IrOp parse_rel(); //<关系运算符>
+		char parse_char();    //<字符>
+		std::string parse_string();  //<字符串>
 		void parse_program(); //<程序>
 		void parse_const_declare(); //<常量说明>
 		void parse_const_define();    //<常量定义>
@@ -132,19 +134,19 @@ namespace ucc
 		void parse_func();    //<有返回值函数定义>
 		void parse_void_func();   //<无返回值函数定义>
 		void parse_compound(bool new_symbol_table);    //<复合语句>
-		void parse_par_list(std::vector<SymbolData> &par_list);    //<参数表>
+		void parse_par_list(std::vector<SymbolData> &par_list, std::vector<std::string> &par_id);    //<参数表>
 		void parse_main_func();   //<主函数>
-		SymbolData parse_exp(); //<表达式>
-		void parse_term();    //<项>
-		void parse_fact();    //<因子>
+		SymbolData parse_exp(std::shared_ptr<Var> &var); //<表达式>
+		void parse_term(std::shared_ptr<Var> &var);    //<项>
+		void parse_fact(std::shared_ptr<Var> &var);    //<因子>
 		void parse_state();    //<语句>
 		void parse_ass_state();   //<赋值语句>
 		void parse_con_state();   //<条件语句>
-		void parse_con(); //<条件>
+		void parse_con(std::shared_ptr<Var> &var); //<条件>
 		void parse_loop_state();  //<循环语句>
-		void parse_step();    //<步长>
+		int parse_step();    //<步长>
 		void parse_func_call(bool can_be_void = true);   //<有返回值函数调用语句> <无返回值函数调用语句>
-		void parse_par_value_list();  //<值参数表>
+		void parse_par_value_list(std::shared_ptr<IrCall> ir);  //<值参数表>
 		void parse_state_list();  //<语句列>
 		void parse_read_state();  //<读语句>
 		void parse_write_state(); //<写语句>
@@ -154,10 +156,18 @@ namespace ucc
 
 		inline void must_and_error(TokenType token_type, ErrorType error_type, bool front);
 
+		std::shared_ptr<IrList> ir_list;
+
 	public:
 		Parser(GrammerOutputer &outputer, Lexer &lexer);
 
+		Parser(Lexer &lexer);
+
 		void parse();
+
+		std::shared_ptr<IrList> get_ir_list() const;
+
+		const std::shared_ptr<SymbolTable> &get_cur_symbol_table() const;
 	};
 }
 #endif //UNIVERSALCOMPILER_PARSER_H
