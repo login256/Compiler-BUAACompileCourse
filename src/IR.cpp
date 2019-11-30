@@ -35,8 +35,8 @@ namespace ucc
 
 	IrCall::IrCall(const std::string &func) : IrCode(IrType::IR_call), func(func) {}
 
-	IrFunc::IrFunc(const std::string &id, std::shared_ptr<SymbolTable> symbol_table) : IrCode(IrType::IR_func), id(id),
-																							   symbol_table(symbol_table) {}
+	IrFunc::IrFunc(const std::string &id, std::shared_ptr<SymbolTable> symbol_table, std::shared_ptr<std::vector<std::string>> par_list)
+			: IrCode(IrType::IR_func), id(id), symbol_table(symbol_table), par_list(par_list) {}
 
 	/*
 	Var::Var(bool is_temp, bool is_ret_value, std::shared_ptr<SymbolTableEntry> table_entry,std::shared_ptr<Var> index)

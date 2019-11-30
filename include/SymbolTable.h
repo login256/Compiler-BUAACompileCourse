@@ -31,11 +31,18 @@ namespace ucc
 		att_const,
 	};
 
+	enum SymbolScope
+	{
+		scope_global,
+		scope_local,
+	};
+
 	struct SymbolTableEntry
 	{
 		std::string id;
 		SymbolType type;
 		SymbolData data;
+		SymbolScope scope;
 		int size;
 		std::vector<SymbolAttribute> attributes;
 

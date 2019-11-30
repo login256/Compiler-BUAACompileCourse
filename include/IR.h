@@ -6,6 +6,7 @@
 #define UNIVERSALCOMPILER_IR_H
 
 #include <string>
+#include <vector>
 #include "SymbolTable.h"
 
 namespace ucc
@@ -198,7 +199,9 @@ namespace ucc
 
 		std::shared_ptr<SymbolTable> symbol_table;
 
-		IrFunc(const std::string &id, std::shared_ptr<SymbolTable> symbol_table);
+		std::shared_ptr<std::vector<std::string>> par_list;
+
+		IrFunc(const std::string &id, std::shared_ptr<SymbolTable> symbol_table, std::shared_ptr<std::vector<std::string>> par_list);
 	};
 
 	class IrRead : public IrCode

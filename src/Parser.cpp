@@ -9,7 +9,7 @@
 #include "include/homework/error_homework.h"
 
 
-//#define SEMANTICERROR
+#define SEMANTICERROR
 
 namespace ucc
 {
@@ -173,21 +173,41 @@ namespace ucc
 		switch (buffer.front()->get_type())
 		{
 			case TokenType::token_les:
+			{
 				re = IrOp::op_lt;
+				get_next();
+				break;
+			}
 			case TokenType::token_leq:
+			{
 				re = IrOp::op_le;
+				get_next();
+				break;
+			}
 			case TokenType::token_grt:
+			{
 				re = IrOp::op_gt;
+				get_next();
+				break;
+			}
 			case TokenType::token_geq:
+			{
 				re = IrOp::op_ge;
+				get_next();
+				break;
+			}
 			case TokenType::token_neq:
+			{
 				re = IrOp::op_ne;
+				get_next();
+				break;
+			}
 			case TokenType::token_eql:
+			{
 				re = IrOp::op_eq;
-				{
-					get_next();
-					break;
-				}
+				get_next();
+				break;
+			}
 			default:
 				wrong_in_parser("no rel");
 		}
@@ -201,7 +221,7 @@ namespace ucc
 		auto cur_char_token = std::static_pointer_cast<CharToken>(buffer.front());
 		get_next();
 		output(SyntaxType::syntax_char);
-		return cur_char_token->get_value()[1];
+		return cur_char_token->get_value()[0];
 	}
 
 	std::string Parser::parse_string()
@@ -218,13 +238,13 @@ namespace ucc
 		cur_symbol_table = std::make_shared<SymbolTable>();
 		if (buffer.front()->get_type() == TokenType::token_const)
 		{
-			parse_const_declare();
+			parse_const_declare(SymbolScope::scope_global);
 		}
 		if (buffer.at(2)->get_type() == TokenType::token_comma ||
 			buffer.at(2)->get_type() == TokenType::token_lbrackets ||
 			buffer.at(2)->get_type() == TokenType::token_semi)
 		{
-			parse_var_declare();
+			parse_var_declare(SymbolScope::scope_global);
 		}
 		while (buffer.at(1)->get_type() == TokenType::token_id)
 		{
@@ -245,21 +265,21 @@ namespace ucc
 		output(SyntaxType::syntax_program);
 	}
 
-	void Parser::parse_const_declare()
+	void Parser::parse_const_declare(SymbolScope scope)
 	{
 		MUST_BE(TokenType::token_const);
-		parse_const_define();
+		parse_const_define(scope);
 		MUST_BE(TokenType::token_semi);
 		while (IS_TOKEN(TokenType::token_const))
 		{
 			get_next();
-			parse_const_define();
+			parse_const_define(scope);
 			MUST_BE(TokenType::token_semi);
 		}
 		output(SyntaxType::syntax_const_declare);
 	}
 
-	void Parser::parse_const_define()
+	void Parser::parse_const_define(SymbolScope scope)
 	{
 		SymbolData data_type;
 		int size = 0;
@@ -431,20 +451,20 @@ namespace ucc
 		return id;
 	}
 
-	void Parser::parse_var_declare()
+	void Parser::parse_var_declare(SymbolScope scope)
 	{
-		parse_var_define();
+		parse_var_define(scope);
 		MUST_BE(TokenType::token_semi);
 		while ((IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char)) &&
 			   buffer.at(2)->get_type() != TokenType::token_lpar)
 		{
-			parse_var_define();
+			parse_var_define(scope);
 			MUST_BE(TokenType::token_semi);
 		}
 		output(SyntaxType::syntax_var_declare);
 	}
 
-	void Parser::parse_var_define()
+	void Parser::parse_var_define(SymbolScope scope)
 	{
 		SymbolData data;
 		int size = 0;
@@ -536,7 +556,7 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		parse_par_list(func_args[id], func_args_id[id]);
 		must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
-		ir_list->push_back(std::make_shared<IrFunc>(id, cur_symbol_table));
+		ir_list->push_back(std::make_shared<IrFunc>(id, cur_symbol_table, std::make_shared<std::vector<std::string>>(func_args_id[id])));
 		MUST_BE(TokenType::token_lbrace);
 		parse_compound(false);
 		MUST_BE(TokenType::token_rbrace);
@@ -572,7 +592,7 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		parse_par_list(func_args[cur_id], func_args_id[cur_id]);
 		must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
-		ir_list->push_back(std::make_shared<IrFunc>(cur_id, cur_symbol_table));
+		ir_list->push_back(std::make_shared<IrFunc>(cur_id, cur_symbol_table, std::make_shared<std::vector<std::string>>(func_args_id[cur_id])));
 		MUST_BE(TokenType::token_lbrace);
 		parse_compound(false);
 		MUST_BE(TokenType::token_rbrace);
@@ -597,11 +617,11 @@ namespace ucc
 		}
 		if (IS_TOKEN(TokenType::token_const))
 		{
-			parse_const_declare();
+			parse_const_declare(SymbolScope::scope_local);
 		}
 		if (IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char))
 		{
-			parse_var_declare();
+			parse_var_declare(SymbolScope::scope_local);
 		}
 		parse_state_list();
 		if (new_symbol_table)
@@ -668,7 +688,7 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
 		MUST_BE(TokenType::token_lbrace);
-		ir_list->push_back(std::make_shared<IrFunc>("main", cur_symbol_table));
+		ir_list->push_back(std::make_shared<IrFunc>("main", cur_symbol_table, std::make_shared<std::vector<std::string>>()));
 		parse_compound(false);
 		MUST_BE(TokenType::token_rbrace);
 		ir_list->push_back(std::make_shared<IrFuncEnd>());
@@ -784,10 +804,10 @@ namespace ucc
 					if (IS_TOKEN(TokenType::token_lbrackets))
 					{
 						get_next();
+						std::shared_ptr<Var> index;
 #ifdef SEMANTICERROR
 						auto v =
 #endif
-						std::shared_ptr<Var> index;
 						parse_exp(index);
 						auto index_t = std::make_shared<TempVar>();
 						ir_list->push_back(std::make_shared<IrAssign>(IrOp::op_add, index, index_t));
@@ -870,7 +890,13 @@ namespace ucc
 			{
 				if (buffer.at(1)->get_type() == TokenType::token_lpar)
 				{
+#ifdef SEMANTICERROR
+					ErrorData::is_char_exp.push(true);
+#endif
 					parse_func_call();
+#ifdef SEMANTICERROR
+					ErrorData::is_char_exp.pop();
+#endif
 					//MUST_BE(TokenType::token_semi);
 					must_and_error(TokenType::token_semi, ErrorType::should_be_semi, true);
 				}
@@ -936,11 +962,10 @@ namespace ucc
 		if (IS_TOKEN(TokenType::token_lbrackets))
 		{
 			get_next();
-
+			std::shared_ptr<Var> index;
 #ifdef SEMANTICERROR
 			auto v =
 #endif
-			std::shared_ptr<Var> index;
 			parse_exp(index);
 			auto index_t = std::make_shared<TempVar>();
 			ir_list->push_back(std::make_shared<IrAssign>(IrOp::op_add, index, index_t));
@@ -1008,13 +1033,14 @@ namespace ucc
 			case TokenType::token_eql:
 			{
 				IrOp op = parse_rel();
+				std::shared_ptr<Var> r_var;
 #ifdef SEMANTICERROR
 				auto exp_type2 =
 #endif
-				std::shared_ptr<Var> r_var;
 				parse_exp(r_var);
 				auto tempt = std::make_shared<TempVar>();
 				ir_list->push_back(std::make_shared<IrAssign>(op, var, r_var, tempt));
+				var = tempt;
 #ifdef SEMANTICERROR
 				if (exp_type2 != data_int)
 				{
@@ -1111,6 +1137,7 @@ namespace ucc
 				auto var2 = std::make_shared<NorVar>(entry2);
 				auto step_var = std::make_shared<ConstVar>(step);
 				ir_list->push_back(std::make_shared<IrAssign>(neg, var2, step_var, var1));
+				ir_list->push_back(std::make_shared<IrJump>(label_begin));
 				ir_list->push_back(std::make_shared<IrLable>(label_end));
 				break;
 			}
@@ -1173,10 +1200,10 @@ namespace ucc
 			case TokenType::token_number :
 			case TokenType::token_cchar :
 			{
+				std::shared_ptr<Var> curt;
 #ifdef SEMANTICERROR
 				auto exp_type =
 #endif
-				std::shared_ptr<Var> curt;
 				parse_exp(curt);
 				ir->vars.push_back(curt);
 #ifdef SEMANTICERROR
@@ -1268,8 +1295,9 @@ namespace ucc
 			{
 				get_next();
 				std::shared_ptr<Var> var;
-				parse_exp(var);
+				auto sd = parse_exp(var);
 				bool is_char = false;
+				/*
 				if (var->var_type == VarType::var_normal)
 				{
 					auto v = std::static_pointer_cast<NorVar>(var);
@@ -1279,14 +1307,20 @@ namespace ucc
 					}
 				}
 				// 有 bug, 数组，函数调用
+				 */
+				if (sd == SymbolData::data_char)
+				{
+					is_char = true;
+				}
 				ir_list->push_back(std::make_shared<IrWrite>(var, is_char));
 			}
 		}
 		else
 		{
 			std::shared_ptr<Var> var;
-			parse_exp(var);
+			auto sd = parse_exp(var);
 			bool is_char = false;
+			/*
 			if (var->var_type == VarType::var_normal)
 			{
 				auto v = std::static_pointer_cast<NorVar>(var);
@@ -1294,6 +1328,11 @@ namespace ucc
 				{
 					is_char = true;
 				}
+			}
+			*/
+			if (sd == SymbolData::data_char)
+			{
+				is_char = true;
 			}
 			ir_list->push_back(std::make_shared<IrWrite>(var, is_char));
 		}

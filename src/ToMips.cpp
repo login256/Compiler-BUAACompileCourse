@@ -11,6 +11,7 @@ namespace ucc
 {
 	int cur_stack_size = 0;
 	static std::shared_ptr<SymbolTable> global_table;
+	static std::shared_ptr<SymbolTable> cur_local_table;
 	std::ofstream mips_output_stream;
 #define $s0 16
 #define $s1 17
@@ -98,12 +99,6 @@ namespace ucc
 			case var_temp:
 			{
 				auto var = std::static_pointer_cast<TempVar>(var_t);
-				if (var->offset == 0)
-				{
-					cur_stack_size += 4;
-					var->offset = -cur_stack_size;
-					mips_output_stream << "addiu $sp, $sp, -4" << std::endl;
-				}
 				long long to_sp = cur_stack_size + var->offset;
 				mips_output_stream << "sw $" << reg << ", " << to_sp << "($sp)" << std::endl;
 				break;
@@ -197,8 +192,9 @@ namespace ucc
 		mips_output_stream << "jal main" << std::endl;
 		mips_output_stream << "li $v0 10" << std::endl;
 		mips_output_stream << "syscall" << std::endl;
-		for (auto ir_t : *ir_list)
+		for (auto ir_it = ir_list->begin(); ir_it != ir_list->end(); ir_it++)
 		{
+			auto ir_t = *ir_it;
 			switch (ir_t->ir_type)
 			{
 				case IrType::IR_assign :
@@ -289,13 +285,38 @@ namespace ucc
 				}
 				case IR_call:
 				{
+					auto ir = std::static_pointer_cast<IrCall>(ir_t);
+					mips_output_stream << "addiu $sp, $sp, -" << ir->vars.size() * 4 << std::endl;
+					cur_stack_size += ir->vars.size() * 4;
+					for (int i = 0; i < ir->vars.size(); i++)
+					{
+						if (i < 4)
+						{
+							get_to(ir->vars[i], $a0 + i);
+						}
+						else
+						{
+							get_to(ir->vars[i], $s0);
+							int to_sp = i * 4;
+							mips_output_stream << "sw $s0, " << to_sp << "($sp)" << std::endl;
+							mips_output_stream << "sw $s0, " << to_sp << "($sp)" << std::endl;
+						}
+					}
+					mips_output_stream << "jal " << ir->func << std::endl;
+					mips_output_stream << "addiu $sp, $sp, " << ir->vars.size() * 4 << std::endl;
+					cur_stack_size -= ir->vars.size() * 4;
 					break;
 				}
 				case IR_ret:
 				{
-					//not finished
+					auto ir = std::static_pointer_cast<IrRet>(ir_t);
+					if (!ir->is_void)
+					{
+						get_to(ir->var, $v0);
+					}
 					mips_output_stream << "addiu $sp, $sp, " << cur_stack_size << std::endl;
-					mips_output_stream << "sw $ra, -4($sp)" << std::endl;
+					mips_output_stream << "lw $ra, -4($sp)" << std::endl;
+					mips_output_stream << "jr $ra" << std::endl;
 					break;
 				}
 				case IR_branch:
@@ -360,7 +381,47 @@ namespace ucc
 							entry->address = cur_stack_size;
 						}
 					}
-					//unfinished
+					for (auto sub_it = ir_it; (*sub_it)->ir_type != IrType::IR_func_end; sub_it++)
+					{
+						auto sub_ir_t = *sub_it;
+						bool is = false;
+						std::shared_ptr<Var> var_t;
+						if (sub_ir_t->ir_type == IrType::IR_assign)
+						{
+							is = true;
+							auto sub_ir = std::static_pointer_cast<IrAssign>(sub_ir_t);
+							var_t = sub_ir->aim;
+						}
+						else if(sub_ir_t->ir_type == IrType::IR_read)
+						{
+							is = true;
+							auto sub_ir = std::static_pointer_cast<IrRead>(sub_ir_t);
+							var_t = sub_ir->var;
+						}
+						if (is && var_t->var_type == VarType::var_temp)
+						{
+							auto var = std::static_pointer_cast<TempVar>(var_t);
+							if (var->offset == 0)
+							{
+								cur_stack_size += 4;
+								var->offset = -cur_stack_size;
+								mips_output_stream << "addiu $sp, $sp, -4" << std::endl;
+							}
+						}
+					}
+					for (int i = 0; i < ir->par_list->size(); i++)
+					{
+						if (i < 4)
+						{
+							save_to(4 + i, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]))); // 4 is $a0
+						}
+						else
+						{
+							int to_sp = cur_stack_size + i * 4;
+							mips_output_stream << "lw $s0, " << to_sp << "($sp)" << std::endl;
+							save_to($s0, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i])));
+						}
+					}
 					break;
 				}
 				case IR_write:

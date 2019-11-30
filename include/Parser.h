@@ -121,15 +121,15 @@ namespace ucc
 		char parse_char();    //<字符>
 		std::string parse_string();  //<字符串>
 		void parse_program(); //<程序>
-		void parse_const_declare(); //<常量说明>
-		void parse_const_define();    //<常量定义>
+		void parse_const_declare(SymbolScope scope); //<常量说明>
+		void parse_const_define(SymbolScope scope);    //<常量定义>
 		int parse_uint();    //<无符号整数>
 		int parse_int(); //<整数>
 		std::string parse_id();
 
 		std::string parse_declare_header();  //<声明头部>
-		void parse_var_declare();   //<变量说明>
-		void parse_var_define();  //<变量定义>
+		void parse_var_declare(SymbolScope scope);   //<变量说明>
+		void parse_var_define(SymbolScope scope);  //<变量定义>
 		SymbolData parse_var_type();    //<类型标识符>
 		void parse_func();    //<有返回值函数定义>
 		void parse_void_func();   //<无返回值函数定义>
