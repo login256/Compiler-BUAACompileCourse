@@ -8,15 +8,15 @@
 
 namespace ucc
 {
-	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size,
-									   const std::vector<SymbolAttribute> &attributes) : id(std::move(id)), type(type), data(data),
-																						 size(size),
-																						 attributes(attributes) {}
+	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size, const std::vector<SymbolAttribute> &attributes,
+									   SymbolScope scope) : id(std::move(id)), type(type), data(data),
+															size(size),
+															attributes(attributes), scope(scope) {}
 
-	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size) : id(std::move(id)),
-																									 type(type),
-																									 data(data),
-																									 size(size) {}
+	SymbolTableEntry::SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size, SymbolScope scope) : id(std::move(id)),
+																														type(type),
+																														data(data),
+																														size(size), scope(scope) {}
 
 
 	SymbolTable::SymbolTable() {}

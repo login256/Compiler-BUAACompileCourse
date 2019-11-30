@@ -11,7 +11,6 @@ namespace ucc
 {
 	int cur_stack_size = 0;
 	static std::shared_ptr<SymbolTable> global_table;
-	static std::shared_ptr<SymbolTable> cur_local_table;
 	std::ofstream mips_output_stream;
 #define $s0 16
 #define $s1 17
@@ -39,8 +38,7 @@ namespace ucc
 			case var_normal:
 			{
 				auto var = std::static_pointer_cast<NorVar>(tvar);
-				auto v = global_table->find(var->table_entry->id);
-				if (v == nullptr)
+				if (var->table_entry->scope == SymbolScope::scope_local)
 				{
 					int to_sp = cur_stack_size - var->table_entry->address;
 					mips_output_stream << "lw $" << reg << ", " << to_sp << "($sp)" << std::endl;
@@ -106,8 +104,7 @@ namespace ucc
 			case var_normal:
 			{
 				auto var = std::static_pointer_cast<NorVar>(var_t);
-				auto v = global_table->find(var->table_entry->id);
-				if (v == nullptr)
+				if (var->table_entry->scope == SymbolScope::scope_local)
 				{
 					int to_sp = cur_stack_size - var->table_entry->address;
 					mips_output_stream << "sw $" << reg << ", " << to_sp << "($sp)" << std::endl;

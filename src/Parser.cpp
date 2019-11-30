@@ -302,7 +302,7 @@ namespace ucc
 			default:
 				wrong_in_parser("no int/char int const define");
 		}
-		auto cur_entry = SymbolTableEntry(parse_id(), SymbolType::varible, data_type, size, {SymbolAttribute::att_const});
+		auto cur_entry = SymbolTableEntry(parse_id(), SymbolType::varible, data_type, size, {SymbolAttribute::att_const}, scope);
 		int init_value;
 		MUST_BE(TokenType::token_ass);
 		if (data_type == data_int)
@@ -346,7 +346,7 @@ namespace ucc
 		while (IS_TOKEN(TokenType::token_comma))
 		{
 			get_next();
-			cur_entry = SymbolTableEntry(parse_id(), SymbolType::varible, data_type, size, {SymbolAttribute::att_const});
+			cur_entry = SymbolTableEntry(parse_id(), SymbolType::varible, data_type, size, {SymbolAttribute::att_const}, scope);
 			MUST_BE(TokenType::token_ass);
 			if (data_type == data_int)
 			{
@@ -442,7 +442,7 @@ namespace ucc
 		}
 		get_next();
 		auto id = parse_id();
-		if (!cur_symbol_table->add(SymbolTableEntry(id, SymbolType::func, data, 0)))
+		if (!cur_symbol_table->add(SymbolTableEntry(id, SymbolType::func, data, 0, SymbolScope::scope_global)))
 		{
 			error_handler(Error(ErrorType::id_redefine, buffer.get_last()->get_line()));
 			id = id + "$$wrong_func";
@@ -491,7 +491,7 @@ namespace ucc
 			}
 			must_and_error(TokenType::token_rbrackets, ErrorType::should_be_rbrac, false);
 		}
-		if (!cur_symbol_table->add(SymbolTableEntry(cur_id, type, data, tsize)))
+		if (!cur_symbol_table->add(SymbolTableEntry(cur_id, type, data, tsize, scope)))
 		{
 			error_handler(Error(ErrorType::id_redefine, buffer.get_last()->get_line()));
 		}
@@ -512,7 +512,7 @@ namespace ucc
 				}
 				must_and_error(TokenType::token_rbrackets, ErrorType::should_be_rbrac, false);
 			}
-			if (!cur_symbol_table->add(SymbolTableEntry(cur_id, type, data, tsize)))
+			if (!cur_symbol_table->add(SymbolTableEntry(cur_id, type, data, tsize, scope)))
 			{
 				error_handler(Error(ErrorType::id_redefine, buffer.get_last()->get_line()));
 			}
@@ -583,7 +583,7 @@ namespace ucc
 #endif
 		MUST_BE(TokenType::token_void);
 		std::string cur_id = parse_id();
-		if (!cur_symbol_table->add(SymbolTableEntry(cur_id, SymbolType::func, SymbolData::data_void, 0)))
+		if (!cur_symbol_table->add(SymbolTableEntry(cur_id, SymbolType::func, SymbolData::data_void, 0, SymbolScope::scope_global)))
 		{
 			error_handler(Error(ErrorType::id_redefine, buffer.get_last()->get_line()));
 			cur_id = cur_id + "$$wrong_func";
@@ -646,7 +646,7 @@ namespace ucc
 			{
 				size = CHARSIZE;
 			}
-			if (!cur_symbol_table->add(SymbolTableEntry(cur_id, SymbolType::varible, data_type, size)))
+			if (!cur_symbol_table->add(SymbolTableEntry(cur_id, SymbolType::varible, data_type, size, SymbolScope::scope_local)))
 			{
 				error_handler(Error(ErrorType::id_redefine, buffer.get_last()->get_line()));
 			}
@@ -669,7 +669,7 @@ namespace ucc
 				{
 					size = CHARSIZE;
 				}
-				if (!cur_symbol_table->add(SymbolTableEntry(cur_id, SymbolType::varible, data_type, size)))
+				if (!cur_symbol_table->add(SymbolTableEntry(cur_id, SymbolType::varible, data_type, size, SymbolScope::scope_local)))
 				{
 					error_handler(Error(ErrorType::id_redefine, buffer.get_last()->get_line()));
 				}

@@ -50,10 +50,10 @@ namespace ucc
 
 		unsigned int address = 0;
 
-		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size);
+		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size, SymbolScope scope);
 
-		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size,
-						 const std::vector<SymbolAttribute> &attributes);
+		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size, const std::vector<SymbolAttribute> &attributes,
+						 SymbolScope scope);
 	};
 
 
