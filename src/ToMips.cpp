@@ -357,13 +357,8 @@ namespace ucc
 						if (entry->type == SymbolType::varible)
 						{
 							cur_stack_size += 4;
-							mips_output_stream << "addiu $sp, $sp, -4" << std::endl;
+							//mips_output_stream << "addiu $sp, $sp, -4" << std::endl;
 							entry->address = cur_stack_size;
-							if (entry->attributes.size() >= 1) //?
-							{
-								mips_output_stream << "li $t0, " << entry->init_value << std::endl;
-								mips_output_stream << "sw $t0, 0($sp)" << std::endl;
-							}
 						}
 						else if (entry->type == SymbolType::array)
 						{
@@ -375,8 +370,22 @@ namespace ucc
 							}
 							*/
 							cur_stack_size += size;
-							mips_output_stream << "addiu $sp, $sp, -" << size << std::endl;
+							//mips_output_stream << "addiu $sp, $sp, -" << size << std::endl;
 							entry->address = cur_stack_size;
+						}
+					}
+					mips_output_stream << "addiu $sp, $sp, -" << cur_stack_size - 4 << std::endl;
+					for (auto e : ir->symbol_table->get_table())
+					{
+						auto entry = e.second;
+						if (entry->type == SymbolType::varible)
+						{
+							if (entry->attributes.size() >= 1) //?
+							{
+								int to_sp = cur_stack_size - entry->address;
+								mips_output_stream << "li $t0, " << entry->init_value << std::endl;
+								mips_output_stream << "sw $t0, " << to_sp << "($sp)" << std::endl;
+							}
 						}
 					}
 					for (auto sub_it = ir_it; (*sub_it)->ir_type != IrType::IR_func_end; sub_it++)
@@ -390,7 +399,7 @@ namespace ucc
 							auto sub_ir = std::static_pointer_cast<IrAssign>(sub_ir_t);
 							var_t = sub_ir->aim;
 						}
-						else if(sub_ir_t->ir_type == IrType::IR_read)
+						else if (sub_ir_t->ir_type == IrType::IR_read)
 						{
 							is = true;
 							auto sub_ir = std::static_pointer_cast<IrRead>(sub_ir_t);
