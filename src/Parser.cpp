@@ -556,7 +556,7 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		parse_par_list(func_args[id], func_args_id[id]);
 		must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
-		ir_list->push_back(std::make_shared<IrFunc>(id, cur_symbol_table, std::make_shared<std::vector<std::string>>(func_args_id[id])));
+		ir_list->push_back(std::make_shared<IrFunc>(id, cur_symbol_table, std::make_shared<std::vector<std::string >>(func_args_id[id])));
 		MUST_BE(TokenType::token_lbrace);
 		parse_compound(false);
 		MUST_BE(TokenType::token_rbrace);
@@ -592,7 +592,8 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		parse_par_list(func_args[cur_id], func_args_id[cur_id]);
 		must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
-		ir_list->push_back(std::make_shared<IrFunc>(cur_id, cur_symbol_table, std::make_shared<std::vector<std::string>>(func_args_id[cur_id])));
+		ir_list->push_back(
+				std::make_shared<IrFunc>(cur_id, cur_symbol_table, std::make_shared<std::vector<std::string >>(func_args_id[cur_id])));
 		MUST_BE(TokenType::token_lbrace);
 		parse_compound(false);
 		MUST_BE(TokenType::token_rbrace);
@@ -688,7 +689,7 @@ namespace ucc
 		MUST_BE(TokenType::token_lpar);
 		must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
 		MUST_BE(TokenType::token_lbrace);
-		ir_list->push_back(std::make_shared<IrFunc>("main", cur_symbol_table, std::make_shared<std::vector<std::string>>()));
+		ir_list->push_back(std::make_shared<IrFunc>("main", cur_symbol_table, std::make_shared<std::vector<std::string >>()));
 		parse_compound(false);
 		MUST_BE(TokenType::token_rbrace);
 		ir_list->push_back(std::make_shared<IrFuncEnd>());
@@ -808,7 +809,7 @@ namespace ucc
 #ifdef SEMANTICERROR
 						auto v =
 #endif
-						parse_exp(index);
+								parse_exp(index);
 						auto index_t = std::make_shared<TempVar>();
 						ir_list->push_back(std::make_shared<IrAssign>(IrOp::op_add, index, index_t));
 						var = std::make_shared<ArrayVar>(entry, index_t);
@@ -966,7 +967,7 @@ namespace ucc
 #ifdef SEMANTICERROR
 			auto v =
 #endif
-			parse_exp(index);
+					parse_exp(index);
 			auto index_t = std::make_shared<TempVar>();
 			ir_list->push_back(std::make_shared<IrAssign>(IrOp::op_add, index, index_t));
 			l_val = std::make_shared<ArrayVar>(entry, index_t);
@@ -1016,7 +1017,7 @@ namespace ucc
 #ifdef SEMANTICERROR
 		auto exp_type1 =
 #endif
-		parse_exp(var);
+				parse_exp(var);
 #ifdef SEMANTICERROR
 		if (exp_type1 != SymbolData::data_int)
 		{
@@ -1037,7 +1038,7 @@ namespace ucc
 #ifdef SEMANTICERROR
 				auto exp_type2 =
 #endif
-				parse_exp(r_var);
+						parse_exp(r_var);
 				auto tempt = std::make_shared<TempVar>();
 				ir_list->push_back(std::make_shared<IrAssign>(op, var, r_var, tempt));
 				var = tempt;
@@ -1168,11 +1169,11 @@ namespace ucc
 			wrong_in_parser("can't be void");
 		}
 #ifdef SEMANTICERROR
-			else if (entryp->data == SymbolData::data_int)
-			{
-				ErrorData::is_char_exp.top() = false;
-			}
-			ErrorData::cur_func_args = func_args[cur_id];
+		else if (entryp->data == SymbolData::data_int)
+		{
+			ErrorData::is_char_exp.top() = false;
+		}
+		ErrorData::cur_func_args = func_args[cur_id];
 #endif
 		MUST_BE(TokenType::token_lpar);
 		parse_par_value_list(cur_ir);
@@ -1204,7 +1205,7 @@ namespace ucc
 #ifdef SEMANTICERROR
 				auto exp_type =
 #endif
-				parse_exp(curt);
+						parse_exp(curt);
 				ir->vars.push_back(curt);
 #ifdef SEMANTICERROR
 				if (cnt < ErrorData::cur_func_args.size() && exp_type != ErrorData::cur_func_args[cnt])
@@ -1219,7 +1220,7 @@ namespace ucc
 #ifdef SEMANTICERROR
 					exp_type =
 #endif
-					parse_exp(curt);
+							parse_exp(curt);
 					ir->vars.push_back(curt);
 #ifdef SEMANTICERROR
 					if (cnt < ErrorData::cur_func_args.size() && exp_type != ErrorData::cur_func_args[cnt])
@@ -1356,7 +1357,7 @@ namespace ucc
 #ifdef SEMANTICERROR
 			auto exp_type =
 #endif
-			parse_exp(var);
+					parse_exp(var);
 			ir_list->push_back(std::make_shared<IrRet>(var));
 #ifdef SEMANTICERROR
 			if (exp_type == SymbolData::data_char)

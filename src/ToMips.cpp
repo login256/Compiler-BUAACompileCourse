@@ -242,7 +242,8 @@ namespace ucc
 							}
 							case op_div:
 							{
-								mips_output_stream << "div $s0, $s0, $s1" << std::endl;
+								mips_output_stream << "div $s0, $s1" << std::endl;
+								mips_output_stream << "mflo $s0" << std::endl;
 								break;
 							}
 							case op_ge:
