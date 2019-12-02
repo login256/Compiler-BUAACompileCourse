@@ -834,10 +834,10 @@ namespace ucc
 				ErrorData::is_char_exp.top() = false;
 #endif
 				get_next();
-				std::shared_ptr<Var> son_var;
-				parse_exp(son_var);
-				var = std::make_shared<TempVar>();
-				ir_list->push_back(std::make_shared<IrAssign>(IrOp::op_add, son_var, var));
+				//std::shared_ptr<Var> son_var;
+				parse_exp(var);
+				//var = std::make_shared<TempVar>();
+				//ir_list->push_back(std::make_shared<IrAssign>(IrOp::op_add, son_var, var));
 				must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
 				break;
 			}
