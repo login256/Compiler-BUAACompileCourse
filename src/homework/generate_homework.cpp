@@ -13,7 +13,7 @@ using ucc::mips_output_stream;
 
 namespace generate_homework
 {
-	static int process_file(std::ifstream &input_stream, std::ofstream &output_stream, std::ofstream &log_stream)
+	static int process_file(std::ifstream &input_stream, std::ofstream &output_stream, std::ofstream &log_stream, std::ofstream &pre_ir_stream)
 	{
 		std::string input_file_name;
 		input_file_name = "testfile.txt";
@@ -21,6 +21,10 @@ namespace generate_homework
 		output_file_name = "mips.txt";
 		std::string log_file_name;
 		log_file_name = "output.txt";
+
+		std::string pre_ir_file_name;
+		pre_ir_file_name = "pre_ir.txt";
+
 		input_stream.open(input_file_name);
 		if (!input_stream.is_open())
 		{
@@ -39,6 +43,13 @@ namespace generate_homework
 			std::cerr << "Can't open log file!" << std::endl;
 			return -1;
 		}
+		pre_ir_stream.open(pre_ir_file_name);
+		if (!pre_ir_stream.is_open())
+		{
+			std::cerr << "Can't open pre_ir file!" << std::endl;
+			return -1;
+		}
+
 		return 0;
 	}
 
@@ -46,7 +57,8 @@ namespace generate_homework
 	{
 		std::ifstream input_stream;
 		std::ofstream log_stream;
-		if (process_file(input_stream, mips_output_stream, log_stream) != 0)
+		std::ofstream pre_ir_stream;
+		if (process_file(input_stream, mips_output_stream, log_stream, pre_ir_stream) != 0)
 		{
 			return -1;
 		}
@@ -55,6 +67,7 @@ namespace generate_homework
 		//HomeworkGrammerOutputer homework_grammer_outputer(log_stream);
 		auto *parser = new ucc::Parser(/*homework_grammer_outputer, */lexer);
 		parser->parse();
+		pre_ir_stream << *parser->get_ir_list();
 		to_mips(parser->get_ir_list(), parser->get_cur_symbol_table());
 		return 0;
 	}

@@ -12,7 +12,7 @@ namespace ucc
 
 	void IrJump::print(std::ostream &stream) const
 	{
-		stream << "jump " << label;
+		stream << "jump " << *label;
 	}
 
 	int Label::cnt;
@@ -36,11 +36,11 @@ namespace ucc
 	{
 		if (is_true)
 		{
-			os << "beq " << var << " " << label;
+			os << "beq " << *var << " " << *label;
 		}
 		else
 		{
-			os << "bne " << var << " " << label;
+			os << "bne " << *var << " " << *label;
 		}
 	}
 
@@ -56,10 +56,10 @@ namespace ucc
 			switch (op)
 			{
 				case IrOp::op_add:
-					os << aim << " = " << l;
+					os << *aim << " = " << *l;
 					break;
 				case IrOp::op_sub:
-					os << aim << " = -" << l;
+					os << *aim << " = -" << *l;
 					break;
 				default:
 					while (1);//error;
@@ -101,7 +101,7 @@ namespace ucc
 					op_c = "!=";
 					break;
 			}
-			os << aim << " = " << l << " " << op_c << " " << r;
+			os << *aim << " = " << *l << " " << op_c << " " << *r;
 		}
 	}
 
@@ -114,7 +114,7 @@ namespace ucc
 		os << "return";
 		if (!is_void)
 		{
-			os << " " << var;
+			os << " " << *var;
 		}
 	}
 
@@ -123,7 +123,7 @@ namespace ucc
 
 	void IrLable::print(std::ostream &os) const
 	{
-		os << label << ":";
+		os << *label << ":";
 	}
 
 	IrCall::IrCall(const std::string &func) : IrCode(IrType::IR_call), func(func) {}
@@ -246,14 +246,14 @@ namespace ucc
 
 	void IrRead::print(std::ostream &os) const
 	{
-		os << "read " << var;
+		os << "read " << *var;
 	}
 
 	IrWrite::IrWrite(const std::shared_ptr<Var> &var, bool as_char) : IrCode(IrType::IR_write), var(var), as_char(as_char) {}
 
 	void IrWrite::print(std::ostream &os) const
 	{
-		os << "print " << var << " as " << (as_char ? "char" : "int");
+		os << "print " << *var << " as " << (as_char ? "char" : "int");
 	}
 
 	IrFuncEnd::IrFuncEnd() : IrCode(IrType::IR_func_end) {}
@@ -268,7 +268,7 @@ namespace ucc
 	{
 		for (auto code : ir_list)
 		{
-			os << code << std::endl;
+			os << *code << std::endl;
 		}
 		return os;
 	}
