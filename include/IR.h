@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <ostream>
 #include "SymbolTable.h"
 
 namespace ucc
@@ -26,20 +27,11 @@ namespace ucc
 		VarType var_type;
 
 		Var(VarType var_type);
-		/*
-		static int cnt_temp;
 
-		bool is_temp;
-		int id;
-
-		bool is_ret_value;
-
-		std::shared_ptr<SymbolTableEntry> table_entry;
-		std::shared_ptr<Var> index;
-
-		Var(bool is_temp, bool is_ret_value = false, std::shared_ptr<SymbolTableEntry> table_entry = nullptr, std::shared_ptr<Var> index = nullptr);
-		 */
+		virtual void print(std::ostream &os) const = 0;
 	};
+
+	std::ostream &operator<<(std::ostream &os, const Var &var);
 
 	class ConstVar : public Var
 	{
@@ -47,6 +39,8 @@ namespace ucc
 		int value;
 
 		ConstVar(int value);
+
+		void print(std::ostream &os) const override;
 	};
 
 	class TempVar : public Var
@@ -58,12 +52,16 @@ namespace ucc
 		int offset;
 
 		TempVar();
+
+		void print(std::ostream &os) const override;
 	};
 
 	class RetVar : public Var
 	{
 	public:
 		RetVar();
+
+		void print(std::ostream &os) const override;
 	};
 
 	class NorVar : public Var
@@ -72,6 +70,8 @@ namespace ucc
 		std::shared_ptr<SymbolTableEntry> table_entry;
 
 		NorVar(const std::shared_ptr<SymbolTableEntry> &table_entry);
+
+		void print(std::ostream &os) const override;
 	};
 
 	class ArrayVar : public Var
@@ -81,6 +81,8 @@ namespace ucc
 		std::shared_ptr<Var> index;
 
 		ArrayVar(const std::shared_ptr<SymbolTableEntry> &table_entry, const std::shared_ptr<Var> &index);
+
+		void print(std::ostream &os) const override;
 	};
 
 	struct Label
@@ -89,6 +91,8 @@ namespace ucc
 
 		static int cnt;
 		int id;
+
+		friend std::ostream &operator<<(std::ostream &os, const Label &label);
 	};
 
 	enum IrType
@@ -112,6 +116,8 @@ namespace ucc
 
 	public:
 		IrType ir_type;
+
+		virtual void print(std::ostream &os) const = 0;
 	};
 
 	enum IrOp
@@ -138,12 +144,16 @@ namespace ucc
 	public:
 		IrOp op;
 		std::shared_ptr<Var> l, r, aim;
+
+		void print(std::ostream &os) const override;
 	};
 
 	class IrCall : public IrCode
 	{
 	public:
 		IrCall(const std::string &func);
+
+		void print(std::ostream &os) const override;
 
 	public:
 		std::string func;
@@ -158,6 +168,8 @@ namespace ucc
 
 		IrRet();
 
+		void print(std::ostream &os) const override;
+
 	public:
 		bool is_void;
 		std::shared_ptr<Var> var;
@@ -167,6 +179,8 @@ namespace ucc
 	{
 	public:
 		IrBranch(bool is_true, const std::shared_ptr<Var> &var, std::shared_ptr<Label> label);
+
+		void print(std::ostream &os) const override;
 
 	public:
 		bool is_true;
@@ -179,6 +193,8 @@ namespace ucc
 	public:
 		IrJump(std::shared_ptr<Label> label);
 
+		void print(std::ostream &stream) const override;
+
 	public:
 		std::shared_ptr<Label> label;
 	};
@@ -189,6 +205,8 @@ namespace ucc
 		std::shared_ptr<Label> label;
 
 		IrLable(std::shared_ptr<Label> label);
+
+		void print(std::ostream &os) const override;
 	};
 
 
@@ -202,6 +220,8 @@ namespace ucc
 		std::shared_ptr<std::vector<std::string>> par_list;
 
 		IrFunc(const std::string &id, std::shared_ptr<SymbolTable> symbol_table, std::shared_ptr<std::vector<std::string>> par_list);
+
+		void print(std::ostream &os) const override;
 	};
 
 	class IrRead : public IrCode
@@ -210,6 +230,8 @@ namespace ucc
 		std::shared_ptr<NorVar> var;
 
 		IrRead(const std::shared_ptr<NorVar> &var);
+
+		void print(std::ostream &os) const override;
 	};
 
 	class IrWrite : public IrCode
@@ -219,12 +241,16 @@ namespace ucc
 		bool as_char;
 
 		IrWrite(const std::shared_ptr<Var> &var, bool as_char);
+
+		void print(std::ostream &os) const override;
 	};
 
 	class IrFuncEnd : public IrCode
 	{
 	public:
 		IrFuncEnd();
+
+		void print(std::ostream &os) const override;
 	};
 
 	typedef std::vector<std::shared_ptr<IrCode>> IrList;
