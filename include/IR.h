@@ -118,6 +118,8 @@ namespace ucc
 		IrType ir_type;
 
 		virtual void print(std::ostream &os) const = 0;
+
+		friend std::ostream &operator<<(std::ostream &os, const IrCode &code);
 	};
 
 	enum IrOp
@@ -254,6 +256,9 @@ namespace ucc
 	};
 
 	typedef std::vector<std::shared_ptr<IrCode>> IrList;
+
+	std::ostream &operator<<(std::ostream &os, const IrList &ir_list);
+
 	/*
 	class IrList : public std::vector<IrCode>
 	{

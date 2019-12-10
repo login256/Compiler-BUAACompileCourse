@@ -236,6 +236,12 @@ namespace ucc
 		os << table_entry->id << "[" << index << "]";
 	}
 
+	std::ostream &operator<<(std::ostream &os, const IrCode &code)
+	{
+		code.print(os);
+		return os;
+	}
+
 	IrRead::IrRead(const std::shared_ptr<NorVar> &var) : IrCode(IrType::IR_read), var(var) {}
 
 	void IrRead::print(std::ostream &os) const
@@ -255,5 +261,15 @@ namespace ucc
 	void IrFuncEnd::print(std::ostream &os) const
 	{
 		os << "}";
+	}
+
+
+	std::ostream &operator<<(std::ostream &os, const IrList &ir_list)
+	{
+		for (auto code : ir_list)
+		{
+			os << code << std::endl;
+		}
+		return os;
 	}
 }
