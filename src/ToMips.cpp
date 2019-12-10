@@ -46,12 +46,14 @@ namespace ucc
 			auto se = std::static_pointer_cast<ConstVar>(se_t);
 			return fi->value == se->value;
 		}
-		else if (fi_t->var_type == VarType::var_array)
-		{
-			auto fi = std::static_pointer_cast<ArrayVar>(fi_t);
-			auto se = std::static_pointer_cast<ArrayVar>(se_t);
-			return fi->table_entry == se->table_entry && is_same(fi->index, se->index);
-		}
+			/*
+			else if (fi_t->var_type == VarType::var_array)
+			{
+				auto fi = std::static_pointer_cast<ArrayVar>(fi_t);
+				auto se = std::static_pointer_cast<ArrayVar>(se_t);
+				return fi->table_entry == se->table_entry && is_same(fi->index, se->index);
+			}
+			*/
 		else
 		{
 			return false;
@@ -246,6 +248,13 @@ namespace ucc
 				return i;
 			}
 		}
+		for (int i = 0; i < 32; i++)
+		{
+			if (!busy[i] && occ_var[i] && occ_var[i]->var_type == VarType::var_array)
+			{
+				put_back(i);
+			}
+		}
 		for (int i : general_reg)
 		{
 			if (!busy[i] && occ_var[i] == nullptr)
@@ -287,7 +296,7 @@ namespace ucc
 
 	inline void all_put_back()
 	{
-		for (int i : general_reg)
+		for (int i = 0; i < 32; i++)
 		{
 			if (occ_var[i] != nullptr)
 			{
@@ -444,6 +453,7 @@ namespace ucc
 					{
 						if (i < 4)
 						{
+							put_back($a0 + i);
 							int reg = need(ir->vars[i], true);
 							cur_func_codes->codes << "move $" << $a0 + i << ", $" << reg << std::endl;
 						}
@@ -483,15 +493,17 @@ namespace ucc
 					}
 					cur_func_codes->codes << "addiu $sp, $sp, " << cur_stack_size << std::endl;
 					cur_func_codes->codes << "lw $ra, -4($sp)" << std::endl;
-					cur_func_codes->codes << "j " << cur_func_id << "_END$" << std::endl;
+					cur_func_codes->codes << "jr $ra" << std::endl;
+					//cur_func_codes->codes << "j " << cur_func_id << "_END$" << std::endl;
 					break;
 				}
 				case IR_branch:
 				{
 					auto ir = std::static_pointer_cast<IrBranch>(ir_t);
+					all_put_back();
 					int reg = need(ir->var, true);
 					cur_func_codes->codes << "move $v1, $" << reg << std::endl;
-					all_put_back();
+					occ_var[reg] = nullptr;
 					if (ir->is_true)
 					{
 						cur_func_codes->codes << "bnez $" << $v1 << ", __LABEL$" << ir->label->id << std::endl;
@@ -588,8 +600,8 @@ namespace ucc
 							if (entry->attributes.size() >= 1) //?
 							{
 								int to_sp = cur_stack_size - entry->address;
-								cur_func_codes->codes << "li $t0, " << entry->init_value << std::endl;
-								cur_func_codes->codes << "sw $t0, " << to_sp << "($sp)" << std::endl;
+								cur_func_codes->codes << "li $v1, " << entry->init_value << std::endl;
+								cur_func_codes->codes << "sw $v1, " << to_sp << "($sp)" << std::endl;
 							}
 						}
 					}
@@ -597,13 +609,18 @@ namespace ucc
 					{
 						if (i < 4)
 						{
-							save_to(4 + i, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]))); // 4 is $a0
+							occ_var[$a0 + i] = std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]));
+							dirty[$a0 + i] = true;
+							//int reg = need(std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i])), false);
+							//cur_func_codes->codes << "move $" << reg << ", $" << $a0 + i << std::endl;
+							//dirty[reg] = true;
+							//save_to($a0 + i, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]))); // 4 is $a0
 						}
 						else
 						{
 							int to_sp = cur_stack_size + i * 4;
-							cur_func_codes->codes << "lw $s0, " << to_sp << "($sp)" << std::endl;
-							save_to($s0, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i])));
+							cur_func_codes->codes << "lw $v1, " << to_sp << "($sp)" << std::endl;
+							save_to($v1, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i])));
 						}
 					}
 					break;
@@ -619,6 +636,7 @@ namespace ucc
 					{
 						cur_func_codes->codes << "li $v0, 1" << std::endl;
 					}
+					put_back($a0);
 					int reg = need(ir->var, true);
 					cur_func_codes->codes << "move $a0, $" << reg << std::endl;
 					cur_func_codes->codes << "syscall" << std::endl;
@@ -653,12 +671,13 @@ namespace ucc
 					}
 					cur_func_codes->codes << "addiu $sp, $sp, " << cur_stack_size << std::endl;
 					cur_func_codes->codes << "lw $ra, -4($sp)" << std::endl;
-					cur_func_codes->codes << cur_func_id << "_END$:" << std::endl;
+					cur_func_codes->codes << "jr $ra" << std::endl;
+					//cur_func_codes->codes << cur_func_id << "_END$:" << std::endl;
 
 					mips_output_stream << cur_func_id << ":" << std::endl;
 					std::string func_str((std::istreambuf_iterator<char>(cur_func_codes->codes)), std::istreambuf_iterator<char>());
 					mips_output_stream << func_str;
-					mips_output_stream << "jr $ra" << std::endl;
+					//mips_output_stream << "jr $ra" << std::endl;
 					break;
 				}
 			}

@@ -58,7 +58,7 @@ namespace ucc
 	TempVar::TempVar() : Var(VarType::var_temp)
 	{
 		this->id = ++cnt_temp;
-		offset = 0;
+		offset = 4;
 	}
 
 	RetVar::RetVar() : Var(VarType::var_ret) {}
