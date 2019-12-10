@@ -206,7 +206,7 @@ namespace ucc
 	TempVar::TempVar() : Var(VarType::var_temp)
 	{
 		this->id = ++cnt_temp;
-		offset = 4;
+		offset = 0;
 	}
 
 	void TempVar::print(std::ostream &os) const
