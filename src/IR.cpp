@@ -138,7 +138,7 @@ namespace ucc
 			{
 				os << ", ";
 			}
-			os << e;
+			os << *e;
 			is_first = false;
 		}
 		os << ")";
@@ -233,7 +233,7 @@ namespace ucc
 
 	void ArrayVar::print(std::ostream &os) const
 	{
-		os << table_entry->id << "[" << index << "]";
+		os << table_entry->id << "[" << *index << "]";
 	}
 
 	std::ostream &operator<<(std::ostream &os, const IrCode &code)
