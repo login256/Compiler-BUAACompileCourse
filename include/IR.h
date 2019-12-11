@@ -264,6 +264,9 @@ namespace ucc
 	{
 	};
 	 */
+	bool is_same(std::shared_ptr<Var> fi_t, std::shared_ptr<Var> se_t);
+
+	void small_opt(std::shared_ptr<IrList> ir_list);
 }
 
 #endif //UNIVERSALCOMPILER_IR_H

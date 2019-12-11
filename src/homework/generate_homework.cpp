@@ -14,7 +14,8 @@ using ucc::mips_output_stream;
 
 namespace generate_homework
 {
-	static int process_file(std::ifstream &input_stream, std::ofstream &output_stream, std::ofstream &log_stream, std::ofstream &pre_ir_stream)
+	static int process_file(std::ifstream &input_stream, std::ofstream &output_stream, std::ofstream &log_stream, std::ofstream &pre_ir_stream,
+							std::ofstream &back_ir_stream)
 	{
 		std::string input_file_name;
 		input_file_name = "testfile.txt";
@@ -25,6 +26,8 @@ namespace generate_homework
 
 		std::string pre_ir_file_name;
 		pre_ir_file_name = "pre_ir.txt";
+		std::string back_ir_file_name;
+		back_ir_file_name = "back_ir.txt";
 
 		input_stream.open(input_file_name);
 		if (!input_stream.is_open())
@@ -50,7 +53,12 @@ namespace generate_homework
 			std::cerr << "Can't open pre_ir file!" << std::endl;
 			return -1;
 		}
-
+		back_ir_stream.open(back_ir_file_name);
+		if (!back_ir_stream.is_open())
+		{
+			std::cerr << "Can't open back_ir file!" << std::endl;
+			return -1;
+		}
 		return 0;
 	}
 
@@ -59,7 +67,8 @@ namespace generate_homework
 		std::ifstream input_stream;
 		std::ofstream log_stream;
 		std::ofstream pre_ir_stream;
-		if (process_file(input_stream, mips_output_stream, log_stream, pre_ir_stream) != 0)
+		std::ofstream back_ir_stream;
+		if (process_file(input_stream, mips_output_stream, log_stream, pre_ir_stream, back_ir_stream) != 0)
 		{
 			return -1;
 		}
@@ -72,7 +81,9 @@ namespace generate_homework
 		bool opt = true;
 		if (opt)
 		{
-			auto graph = std::make_shared<ucc::FlowGraph>(parser->get_ir_list());
+			//auto graph = std::make_shared<ucc::FlowGraph>(parser->get_ir_list());
+			//ucc::small_opt(parser->get_ir_list());
+			//back_ir_stream << *parser->get_ir_list();
 			to_mips(parser->get_ir_list(), parser->get_cur_symbol_table());
 		}
 		else

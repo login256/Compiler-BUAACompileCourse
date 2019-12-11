@@ -273,5 +273,152 @@ namespace ucc
 		return os;
 	}
 
+	bool is_same(std::shared_ptr<Var> fi_t, std::shared_ptr<Var> se_t)
+	{
+		if (fi_t->var_type != se_t->var_type)
+		{
+			return false;
+		}
+		if (fi_t->var_type == VarType::var_normal)
+		{
+			auto fi = std::static_pointer_cast<NorVar>(fi_t);
+			auto se = std::static_pointer_cast<NorVar>(se_t);
+			return fi->table_entry == se->table_entry;
+		}
+		else if (fi_t->var_type == VarType::var_temp)
+		{
+			auto fi = std::static_pointer_cast<TempVar>(fi_t);
+			auto se = std::static_pointer_cast<TempVar>(se_t);
+			return fi->id == se->id;
+		}
+		else if (fi_t->var_type == VarType::var_const)
+		{
+			auto fi = std::static_pointer_cast<ConstVar>(fi_t);
+			auto se = std::static_pointer_cast<ConstVar>(se_t);
+			return fi->value == se->value;
+		}
+			/*
+			else if (fi_t->var_type == VarType::var_array)
+			{
+				auto fi = std::static_pointer_cast<ArrayVar>(fi_t);
+				auto se = std::static_pointer_cast<ArrayVar>(se_t);
+				return fi->table_entry == se->table_entry && is_same(fi->index, se->index);
+			}
+			*/
+		else
+		{
+			return false;
+		}
+
+	}
+
+	void small_opt(std::shared_ptr<IrList> ir_list)
+	{
+		for (int i = 0; i < ir_list->size(); i++)
+		{
+			auto cur_c = (*ir_list)[i];
+			if (cur_c->ir_type == IrType::ir_assign)
+			{
+				auto cur = std::static_pointer_cast<IrAssign>(cur_c);
+				if (!cur->r && cur->op == IrOp::op_add)
+				{
+					if (i > 0 && (*ir_list)[i - 1]->ir_type == ir_assign)
+					{
+						auto last = std::static_pointer_cast<IrAssign>((*ir_list)[i - 1]);
+						if (is_same(last->aim, cur->l))
+						{
+							if (last->aim->var_type == VarType::var_temp && cur->aim->var_type == VarType::var_normal)
+							{
+								last->aim = cur->aim;
+								ir_list->erase(ir_list->begin() + i);
+								i--;
+							}
+							/*
+							for (int j = i + 1; j < ir_list->size(); j++)
+							{
+								auto code_t = (*ir_list)[j];
+								switch (code_t->ir_type)
+								{
+									case ir_assign:
+									{
+										auto code = std::static_pointer_cast<IrAssign>(code_t);
+										add_use(code->l);
+										if (code->r)
+										{
+											add_use(code->r);
+										}
+										add_def(code->aim);
+										break;
+									}
+									case ir_call:
+									{
+										auto code = std::static_pointer_cast<IrCall>(code_t);
+										for (auto var : code->vars)
+										{
+											add_use(var);
+										}
+										break;
+									}
+									case ir_ret:
+									{
+										auto code = std::static_pointer_cast<IrRet>(code_t);
+										if (!code->is_void)
+										{
+											add_use(code->var);
+										}
+										break;
+									}
+									case ir_branch:
+									{
+										auto code = std::static_pointer_cast<IrBranch>(code_t);
+										add_use(code->var);
+										break;
+									}
+									case ir_jump:
+									{
+										auto code = std::static_pointer_cast<IrJump>(code_t);
+										break;
+									}
+									case ir_label:
+									{
+										auto code = std::static_pointer_cast<IrLable>(code_t);
+										break;
+									}
+									case ir_func:
+									{
+										auto code = std::static_pointer_cast<IrFunc>(code_t);
+										for (auto var_s : *(code->par_list))
+										{
+											add_def(std::make_shared<NorVar>(code->symbol_table->find(var_s)));
+										}
+										break;
+									}
+									case ir_write:
+									{
+										auto code = std::static_pointer_cast<IrWrite>(code_t);
+										add_use(code->var);
+										break;
+									}
+									case ir_read:
+									{
+										auto code = std::static_pointer_cast<IrRead>(code_t);
+										add_def(code->var);
+										break;
+									}
+									case ir_func_end:
+									{
+										auto code = std::static_pointer_cast<IrFuncEnd>(code_t);
+										break;
+									}
+								}
+
+							}
+							 */
+						}
+					}
+				}
+			}
+		}
+	}
 
 }

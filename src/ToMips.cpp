@@ -22,45 +22,6 @@ namespace ucc
 
 	int need(std::shared_ptr<Var> var, bool load);
 
-	bool is_same(std::shared_ptr<Var> fi_t, std::shared_ptr<Var> se_t)
-	{
-		if (fi_t->var_type != se_t->var_type)
-		{
-			return false;
-		}
-		if (fi_t->var_type == VarType::var_normal)
-		{
-			auto fi = std::static_pointer_cast<NorVar>(fi_t);
-			auto se = std::static_pointer_cast<NorVar>(se_t);
-			return fi->table_entry == se->table_entry;
-		}
-		else if (fi_t->var_type == VarType::var_temp)
-		{
-			auto fi = std::static_pointer_cast<TempVar>(fi_t);
-			auto se = std::static_pointer_cast<TempVar>(se_t);
-			return fi->id == se->id;
-		}
-		else if (fi_t->var_type == VarType::var_const)
-		{
-			auto fi = std::static_pointer_cast<ConstVar>(fi_t);
-			auto se = std::static_pointer_cast<ConstVar>(se_t);
-			return fi->value == se->value;
-		}
-			/*
-			else if (fi_t->var_type == VarType::var_array)
-			{
-				auto fi = std::static_pointer_cast<ArrayVar>(fi_t);
-				auto se = std::static_pointer_cast<ArrayVar>(se_t);
-				return fi->table_entry == se->table_entry && is_same(fi->index, se->index);
-			}
-			*/
-		else
-		{
-			return false;
-		}
-
-	}
-
 	void get_to(std::shared_ptr<Var> var_t, int reg)
 	{
 		switch (var_t->var_type)
