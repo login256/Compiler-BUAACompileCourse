@@ -344,7 +344,7 @@ namespace ucc
 			auto ir_t = *ir_it;
 			switch (ir_t->ir_type)
 			{
-				case IrType::IR_assign :
+				case IrType::ir_assign :
 				{
 					auto ir = std::static_pointer_cast<IrAssign>(ir_t);
 					if (ir->r == nullptr)
@@ -362,7 +362,7 @@ namespace ucc
 							}
 							case op_sub:
 							{
-								cur_func_codes->codes << "sub $" << aim_reg << ", $0, $" << l_reg << std::endl;
+								cur_func_codes->codes << "sub $" << aim_reg << ", $1, $" << l_reg << std::endl;
 								break;
 							}
 							default:
@@ -444,7 +444,7 @@ namespace ucc
 					}
 					break;
 				}
-				case IR_call:
+				case ir_call:
 				{
 					auto ir = std::static_pointer_cast<IrCall>(ir_t);
 					cur_func_codes->codes << "addiu $sp, $sp, -" << ir->vars.size() * 4 << std::endl;
@@ -476,7 +476,7 @@ namespace ucc
 					cur_stack_size -= ir->vars.size() * 4;
 					break;
 				}
-				case IR_ret:
+				case ir_ret:
 				{
 					auto ir = std::static_pointer_cast<IrRet>(ir_t);
 					if (!ir->is_void)
@@ -497,7 +497,7 @@ namespace ucc
 					//cur_func_codes->codes << "j " << cur_func_id << "_END$" << std::endl;
 					break;
 				}
-				case IR_branch:
+				case ir_branch:
 				{
 					auto ir = std::static_pointer_cast<IrBranch>(ir_t);
 					all_put_back();
@@ -514,21 +514,21 @@ namespace ucc
 					}
 					break;
 				}
-				case IR_jump:
+				case ir_jump:
 				{
 					all_put_back();
 					auto ir = std::static_pointer_cast<IrJump>(ir_t);
 					cur_func_codes->codes << "j __LABEL$" << ir->label->id << std::endl;
 					break;
 				}
-				case IR_label:
+				case ir_label:
 				{
 					all_put_back();
 					auto ir = std::static_pointer_cast<IrLable>(ir_t);
 					cur_func_codes->codes << "__LABEL$" << ir->label->id << ":" << std::endl;
 					break;
 				}
-				case IR_func:
+				case ir_func:
 				{
 					for (int i = 0; i < 32; i++)
 					{
@@ -564,18 +564,18 @@ namespace ucc
 							entry->address = cur_stack_size;
 						}
 					}
-					for (auto sub_it = ir_it; (*sub_it)->ir_type != IrType::IR_func_end; sub_it++)
+					for (auto sub_it = ir_it; (*sub_it)->ir_type != IrType::ir_func_end; sub_it++)
 					{
 						auto sub_ir_t = *sub_it;
 						bool is = false;
 						std::shared_ptr<Var> var_t;
-						if (sub_ir_t->ir_type == IrType::IR_assign)
+						if (sub_ir_t->ir_type == IrType::ir_assign)
 						{
 							is = true;
 							auto sub_ir = std::static_pointer_cast<IrAssign>(sub_ir_t);
 							var_t = sub_ir->aim;
 						}
-						else if (sub_ir_t->ir_type == IrType::IR_read)
+						else if (sub_ir_t->ir_type == IrType::ir_read)
 						{
 							is = true;
 							auto sub_ir = std::static_pointer_cast<IrRead>(sub_ir_t);
@@ -625,7 +625,7 @@ namespace ucc
 					}
 					break;
 				}
-				case IR_write:
+				case ir_write:
 				{
 					auto ir = std::static_pointer_cast<IrWrite>(ir_t);
 					if (ir->as_char)
@@ -642,7 +642,7 @@ namespace ucc
 					cur_func_codes->codes << "syscall" << std::endl;
 					break;
 				}
-				case IR_read:
+				case ir_read:
 				{
 					auto ir = std::static_pointer_cast<IrRead>(ir_t);
 					if (ir->var->table_entry->data == SymbolData::data_char)
@@ -660,7 +660,7 @@ namespace ucc
 					dirty[reg] = true;
 					break;
 				}
-				case IR_func_end:
+				case ir_func_end:
 				{
 					for (int e : general_reg)
 					{

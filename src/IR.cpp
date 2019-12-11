@@ -8,7 +8,7 @@ namespace ucc
 {
 	IrCode::IrCode(IrType ir_type) : ir_type(ir_type) {}
 
-	IrJump::IrJump(std::shared_ptr<Label> label) : IrCode(IrType::IR_jump), label(label) {}
+	IrJump::IrJump(std::shared_ptr<Label> label) : IrCode(IrType::ir_jump), label(label) {}
 
 	void IrJump::print(std::ostream &stream) const
 	{
@@ -28,7 +28,7 @@ namespace ucc
 		return os;
 	}
 
-	IrBranch::IrBranch(bool is_true, const std::shared_ptr<Var> &var, std::shared_ptr<Label> label) : IrCode(IrType::IR_branch), is_true(is_true),
+	IrBranch::IrBranch(bool is_true, const std::shared_ptr<Var> &var, std::shared_ptr<Label> label) : IrCode(IrType::ir_branch), is_true(is_true),
 																									  var(var),
 																									  label(label) {}
 
@@ -45,9 +45,9 @@ namespace ucc
 	}
 
 	IrAssign::IrAssign(IrOp op, const std::shared_ptr<Var> &l, const std::shared_ptr<Var> &r, const std::shared_ptr<Var> &aim) :
-			IrCode(IrType::IR_assign), op(op), l(l), r(r), aim(aim) {}
+			IrCode(IrType::ir_assign), op(op), l(l), r(r), aim(aim) {}
 
-	IrAssign::IrAssign(IrOp op, const std::shared_ptr<Var> &l, const std::shared_ptr<Var> &aim) : IrCode(IrType::IR_assign), op(op), l(l), aim(aim) {}
+	IrAssign::IrAssign(IrOp op, const std::shared_ptr<Var> &l, const std::shared_ptr<Var> &aim) : IrCode(IrType::ir_assign), op(op), l(l), aim(aim) {}
 
 	void IrAssign::print(std::ostream &os) const
 	{
@@ -105,9 +105,9 @@ namespace ucc
 		}
 	}
 
-	IrRet::IrRet(const std::shared_ptr<Var> &var) : IrCode(IrType::IR_ret), is_void(false), var(var) {}
+	IrRet::IrRet(const std::shared_ptr<Var> &var) : IrCode(IrType::ir_ret), is_void(false), var(var) {}
 
-	IrRet::IrRet() : IrCode(IrType::IR_ret), is_void(true) {}
+	IrRet::IrRet() : IrCode(IrType::ir_ret), is_void(true) {}
 
 	void IrRet::print(std::ostream &os) const
 	{
@@ -119,14 +119,14 @@ namespace ucc
 	}
 
 
-	IrLable::IrLable(std::shared_ptr<Label> label) : IrCode(IrType::IR_label), label(label) {}
+	IrLable::IrLable(std::shared_ptr<Label> label) : IrCode(IrType::ir_label), label(label) {}
 
 	void IrLable::print(std::ostream &os) const
 	{
 		os << *label << ":";
 	}
 
-	IrCall::IrCall(const std::string &func) : IrCode(IrType::IR_call), func(func) {}
+	IrCall::IrCall(const std::string &func) : IrCode(IrType::ir_call), func(func) {}
 
 	void IrCall::print(std::ostream &os) const
 	{
@@ -145,7 +145,7 @@ namespace ucc
 	}
 
 	IrFunc::IrFunc(const std::string &id, std::shared_ptr<SymbolTable> symbol_table, std::shared_ptr<std::vector<std::string>> par_list)
-			: IrCode(IrType::IR_func), id(id), symbol_table(symbol_table), par_list(par_list) {}
+			: IrCode(IrType::ir_func), id(id), symbol_table(symbol_table), par_list(par_list) {}
 
 	void IrFunc::print(std::ostream &os) const
 	{
@@ -242,21 +242,21 @@ namespace ucc
 		return os;
 	}
 
-	IrRead::IrRead(const std::shared_ptr<NorVar> &var) : IrCode(IrType::IR_read), var(var) {}
+	IrRead::IrRead(const std::shared_ptr<NorVar> &var) : IrCode(IrType::ir_read), var(var) {}
 
 	void IrRead::print(std::ostream &os) const
 	{
 		os << "read " << *var;
 	}
 
-	IrWrite::IrWrite(const std::shared_ptr<Var> &var, bool as_char) : IrCode(IrType::IR_write), var(var), as_char(as_char) {}
+	IrWrite::IrWrite(const std::shared_ptr<Var> &var, bool as_char) : IrCode(IrType::ir_write), var(var), as_char(as_char) {}
 
 	void IrWrite::print(std::ostream &os) const
 	{
 		os << "print " << *var << " as " << (as_char ? "char" : "int");
 	}
 
-	IrFuncEnd::IrFuncEnd() : IrCode(IrType::IR_func_end) {}
+	IrFuncEnd::IrFuncEnd() : IrCode(IrType::ir_func_end) {}
 
 	void IrFuncEnd::print(std::ostream &os) const
 	{
@@ -272,4 +272,6 @@ namespace ucc
 		}
 		return os;
 	}
+
+
 }

@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <include/FlowGraph.h>
 #include "include/ToMips.h"
 #include "include/homework/generate_homework.h"
 #include "include/homework/syntactic_homework.h"
@@ -68,7 +69,16 @@ namespace generate_homework
 		auto *parser = new ucc::Parser(/*homework_grammer_outputer, */lexer);
 		parser->parse();
 		pre_ir_stream << *parser->get_ir_list();
-		to_mips(parser->get_ir_list(), parser->get_cur_symbol_table());
+		bool opt = true;
+		if (opt)
+		{
+			auto graph = std::make_shared<ucc::FlowGraph>(parser->get_ir_list());
+			to_mips(parser->get_ir_list(), parser->get_cur_symbol_table());
+		}
+		else
+		{
+			to_mips(parser->get_ir_list(), parser->get_cur_symbol_table());
+		}
 		return 0;
 	}
 }

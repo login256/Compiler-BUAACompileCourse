@@ -97,16 +97,16 @@ namespace ucc
 
 	enum IrType
 	{
-		IR_assign,
-		IR_call,
-		IR_ret,
-		IR_branch,
-		IR_jump,
-		IR_label,
-		IR_func,
-		IR_write,
-		IR_read,
-		IR_func_end,
+		ir_assign,
+		ir_call,
+		ir_ret,
+		ir_branch,
+		ir_jump,
+		ir_label,
+		ir_func,
+		ir_write,
+		ir_read,
+		ir_func_end,
 	};
 
 	class IrCode
@@ -264,7 +264,6 @@ namespace ucc
 	{
 	};
 	 */
-
 }
 
 #endif //UNIVERSALCOMPILER_IR_H
