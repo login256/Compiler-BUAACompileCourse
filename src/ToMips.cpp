@@ -323,7 +323,7 @@ namespace ucc
 							}
 							case op_sub:
 							{
-								cur_func_codes->codes << "sub $" << aim_reg << ", $1, $" << l_reg << std::endl;
+								cur_func_codes->codes << "sub $" << aim_reg << ", $0, $" << l_reg << std::endl;
 								break;
 							}
 							default:
