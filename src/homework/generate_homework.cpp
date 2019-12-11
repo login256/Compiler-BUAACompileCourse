@@ -82,8 +82,8 @@ namespace generate_homework
 		if (opt)
 		{
 			//auto graph = std::make_shared<ucc::FlowGraph>(parser->get_ir_list());
-			//ucc::small_opt(parser->get_ir_list());
-			//back_ir_stream << *parser->get_ir_list();
+			ucc::small_opt(parser->get_ir_list());
+			back_ir_stream << *parser->get_ir_list();
 			to_mips(parser->get_ir_list(), parser->get_cur_symbol_table());
 		}
 		else
