@@ -4,7 +4,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <include/FlowGraph.h>
+#include "include/FlowGraph.h"
 #include "include/ToMips.h"
 #include "include/homework/generate_homework.h"
 #include "include/homework/syntactic_homework.h"
