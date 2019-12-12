@@ -19,6 +19,7 @@ namespace ucc
 	static std::string cur_func_id;
 
 	std::shared_ptr<FuncMipsCodes> cur_func_codes;
+	std::vector<int> cur_func_use_s;
 
 	int need(std::shared_ptr<Var> var, bool load);
 
@@ -165,7 +166,8 @@ namespace ucc
 		}
 	}
 
-	static std::vector<int> general_reg = {$t0, $t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $t9};
+	static std::vector<int> general_reg = {$s0, $s1, $s2, $s3, $s4, $s5, $s6, $s7};
+	static std::vector<int> temp_reg = {$t0, $t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $t9};
 	static std::vector<int> use_seq;
 	static bool dirty[32];
 
@@ -216,7 +218,7 @@ namespace ucc
 				put_back(i);
 			}
 		}
-		for (int i : general_reg)
+		for (int i : temp_reg)
 		{
 			if (!busy[i] && occ_var[i] == nullptr)
 			{
@@ -253,6 +255,17 @@ namespace ucc
 			get_to(var, w);
 		}
 		return w;
+	}
+
+	inline void temp_put_back()
+	{
+		for (int i : temp_reg)
+		{
+			if (occ_var[i] != nullptr)
+			{
+				put_back(i);
+			}
+		}
 	}
 
 	inline void all_put_back()
@@ -408,33 +421,51 @@ namespace ucc
 				case ir_call:
 				{
 					auto ir = std::static_pointer_cast<IrCall>(ir_t);
-					cur_func_codes->codes << "addiu $sp, $sp, -" << ir->vars.size() * 4 << std::endl;
-					cur_stack_size += ir->vars.size() * 4;
+					cur_func_codes->codes << "addiu $sp, $sp, -" << ir->vars.size() * 4 + 16 << std::endl;
+					cur_stack_size += ir->vars.size() * 4 + 16;
+					bool save_reg[4] = {false, false, false, false};
 					for (int i = 0; i < ir->vars.size(); i++)
 					{
 						if (i < 4)
 						{
-							put_back($a0 + i);
+							if (occ_var[$a0 + i])
+							{
+								save_reg[i] = true;
+								cur_func_codes->codes << "sw $" << $a0 + i << ", " << ir->vars.size() * 4 + i * 4 << "($sp)" << std::endl;
+							}
 							int reg = need(ir->vars[i], true);
-							cur_func_codes->codes << "move $" << $a0 + i << ", $" << reg << std::endl;
+							if (reg >= $a0 && reg < $a0 + i)
+							{
+								cur_func_codes->codes << "lw $" << $a0 + i << ", " << ir->vars.size() * 4 + (reg - $a0) * 4 << "($sp)" << std::endl;
+							}
+							else
+							{
+								cur_func_codes->codes << "move $" << $a0 + i << ", $" << reg << std::endl;
+							}
 						}
 						else
 						{
 							int reg = need(ir->vars[i], true);
+							if (reg >= $a0 && reg <= $a0 + 3)
+							{
+								cur_func_codes->codes << "lw $" << $v1 << ", " << ir->vars.size() * 4 + (reg - $a0) * 4 << "($sp)" << std::endl;
+								reg = $v1;
+							}
 							int to_sp = i * 4;
 							cur_func_codes->codes << "sw $" << reg << ", " << to_sp << "($sp)" << std::endl;
 						}
 					}
-					for (int i : general_reg)
+					temp_put_back();
+					cur_func_codes->codes << "jal " << ir->func << std::endl;
+					for (int i = 0; i < 4; i++)
 					{
-						if (occ_var[i] != nullptr)
+						if (save_reg[i])
 						{
-							put_back(i);
+							cur_func_codes->codes << "lw $" << $a0 + i << ", " << ir->vars.size() * 4 + i * 4 << "($sp)" << std::endl;
 						}
 					}
-					cur_func_codes->codes << "jal " << ir->func << std::endl;
-					cur_func_codes->codes << "addiu $sp, $sp, " << ir->vars.size() * 4 << std::endl;
-					cur_stack_size -= ir->vars.size() * 4;
+					cur_func_codes->codes << "addiu $sp, $sp, " << ir->vars.size() * 4 + 16 << std::endl;
+					cur_stack_size -= ir->vars.size() * 4 + 16;
 					break;
 				}
 				case ir_ret:
@@ -445,13 +476,7 @@ namespace ucc
 						int reg = need(ir->var, true);
 						cur_func_codes->codes << "move $v0, $" << reg << std::endl;
 					}
-					for (int e : general_reg)
-					{
-						if (occ_var[e] != nullptr)
-						{
-							put_back(e);
-						}
-					}
+					temp_put_back();
 					cur_func_codes->codes << "addiu $sp, $sp, " << cur_stack_size << std::endl;
 					cur_func_codes->codes << "lw $ra, -4($sp)" << std::endl;
 					cur_func_codes->codes << "jr $ra" << std::endl;
@@ -461,10 +486,10 @@ namespace ucc
 				case ir_branch:
 				{
 					auto ir = std::static_pointer_cast<IrBranch>(ir_t);
-					all_put_back();
+					temp_put_back();
 					int reg = need(ir->var, true);
 					cur_func_codes->codes << "move $v1, $" << reg << std::endl;
-					occ_var[reg] = nullptr;
+					temp_put_back();
 					if (ir->is_true)
 					{
 						cur_func_codes->codes << "bnez $" << $v1 << ", __LABEL$" << ir->label->id << std::endl;
@@ -477,14 +502,14 @@ namespace ucc
 				}
 				case ir_jump:
 				{
-					all_put_back();
+					temp_put_back();
 					auto ir = std::static_pointer_cast<IrJump>(ir_t);
 					cur_func_codes->codes << "j __LABEL$" << ir->label->id << std::endl;
 					break;
 				}
 				case ir_label:
 				{
-					all_put_back();
+					temp_put_back();
 					auto ir = std::static_pointer_cast<IrLable>(ir_t);
 					cur_func_codes->codes << "__LABEL$" << ir->label->id << ":" << std::endl;
 					break;
@@ -498,6 +523,7 @@ namespace ucc
 						dirty[i] = false;
 					}
 					use_seq.clear();
+					cur_func_use_s.clear();
 					cur_func_codes = std::make_shared<FuncMipsCodes>();
 					auto ir = std::static_pointer_cast<IrFunc>(ir_t);
 					cur_func_id = ir->id;
@@ -597,10 +623,17 @@ namespace ucc
 					{
 						cur_func_codes->codes << "li $v0, 1" << std::endl;
 					}
-					put_back($a0);
+					if (occ_var[$a0] != nullptr)
+					{
+						cur_func_codes->codes << "move $v1, $a0" << std::endl;
+					}
 					int reg = need(ir->var, true);
 					cur_func_codes->codes << "move $a0, $" << reg << std::endl;
 					cur_func_codes->codes << "syscall" << std::endl;
+					if (occ_var[$a0] != nullptr)
+					{
+						cur_func_codes->codes << "move $a0, $v1" << std::endl;
+					}
 					break;
 				}
 				case ir_read:
@@ -623,13 +656,7 @@ namespace ucc
 				}
 				case ir_func_end:
 				{
-					for (int e : general_reg)
-					{
-						if (occ_var[e] != nullptr)
-						{
-							put_back(e);
-						}
-					}
+					all_put_back();
 					cur_func_codes->codes << "addiu $sp, $sp, " << cur_stack_size << std::endl;
 					cur_func_codes->codes << "lw $ra, -4($sp)" << std::endl;
 					cur_func_codes->codes << "jr $ra" << std::endl;
