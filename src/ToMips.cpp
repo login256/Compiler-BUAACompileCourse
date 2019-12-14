@@ -205,6 +205,18 @@ namespace ucc
 		}
 	}
 
+	bool has_in(std::shared_ptr<Var> var)
+	{
+		for (int i = 0; i < 32; i++)
+		{
+			if (occ_var[i] != nullptr && is_same(occ_var[i], var))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	int need(std::shared_ptr<Var> var, bool load)
 	{
 		for (int i = 0; i < 32; i++)
@@ -616,10 +628,41 @@ namespace ucc
 						auto &entry = e.second;
 						if (cnt < general_reg.size() && entry->attributes.find(SymbolAttribute::att_register) != entry->attributes.end())
 						{
-							occ_var[$s0 + cnt] = std::make_shared<NorVar>(entry);
-							cur_func_use_s.push_back(cnt);
-							cnt++;
-							cur_stack_size += 4;
+							auto var = std::make_shared<NorVar>(entry);
+							if (!has_in(var))
+							{
+								occ_var[$s0 + cnt] = var;
+								cur_func_use_s.push_back(cnt);
+								cnt++;
+								cur_stack_size += 4;
+							}
+						}
+					}
+					for (int i = 0; i < ir->par_list->size(); i++)
+					{
+						if (i < 4)
+						{
+							occ_var[$a0 + i] = std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]));
+							dirty[$a0 + i] = true;
+							//int reg = need(std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i])), false);
+							//cur_func_codes->codes << "move $" << reg << ", $" << $a0 + i << std::endl;
+							//dirty[reg] = true;
+							//save_to($a0 + i, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]))); // 4 is $a0
+						}
+					}
+					for (auto e : ir->symbol_table->get_table())
+					{
+						auto &entry = e.second;
+						if (cnt < general_reg.size() && entry->type == SymbolType::varible)
+						{
+							auto var = std::make_shared<NorVar>(entry);
+							if (!has_in(var))
+							{
+								occ_var[$s0 + cnt] = var;
+								cur_func_use_s.push_back(cnt);
+								cnt++;
+								cur_stack_size += 4;
+							}
 						}
 					}
 					cur_func_codes->codes << "addiu $sp, $sp, -" << cur_stack_size << std::endl;
@@ -642,16 +685,7 @@ namespace ucc
 					}
 					for (int i = 0; i < ir->par_list->size(); i++)
 					{
-						if (i < 4)
-						{
-							occ_var[$a0 + i] = std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]));
-							dirty[$a0 + i] = true;
-							//int reg = need(std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i])), false);
-							//cur_func_codes->codes << "move $" << reg << ", $" << $a0 + i << std::endl;
-							//dirty[reg] = true;
-							//save_to($a0 + i, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]))); // 4 is $a0
-						}
-						else
+						if (i >= 4)
 						{
 							int to_sp = cur_stack_size + i * 4;
 							cur_func_codes->codes << "lw $v1, " << to_sp << "($sp)" << std::endl;
