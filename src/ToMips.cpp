@@ -526,7 +526,6 @@ namespace ucc
 				case ir_branch:
 				{
 					auto ir = std::static_pointer_cast<IrBranch>(ir_t);
-					temp_put_back();
 					int reg = need(ir->var, true);
 					if (is_temp(reg))
 					{
