@@ -97,6 +97,7 @@ namespace ucc
 		}
 	}
 
+	int cur_ir_line;
 
 	void save_to(int reg, std::shared_ptr<Var> var_t)
 	{
@@ -183,6 +184,8 @@ namespace ucc
 		return false;
 	}
 
+	std::vector<std::set<std::shared_ptr<Var>>> used_temp;
+
 	void put_back(int w)
 	{
 		busy[w] = false;
@@ -190,7 +193,26 @@ namespace ucc
 		{
 			if (dirty[w])
 			{
-				save_to(w, occ_var[w]);
+				if (occ_var[w]->var_type == VarType::var_temp)
+				{
+					bool is_using = false;
+					for (auto var_t : used_temp[cur_ir_line])
+					{
+						if (is_same(var_t, occ_var[w]))
+						{
+							is_using = true;
+							break;
+						}
+					}
+					if (is_using)
+					{
+						save_to(w, occ_var[w]);
+					}
+				}
+				else
+				{
+					save_to(w, occ_var[w]);
+				}
 			}
 		}
 		occ_var[w] = nullptr;
@@ -315,8 +337,113 @@ namespace ucc
 		}
 	}
 
+
+	void get_use_temp(std::set<std::shared_ptr<Var>> &use, std::shared_ptr<Var> var)
+	{
+		if (var->var_type == VarType::var_array)
+		{
+			auto var_t = std::static_pointer_cast<ArrayVar>(var);
+			var = var_t->index;
+		}
+		if (var->var_type != VarType::var_temp)
+		{
+			return;
+		}
+		for (auto v : use)
+		{
+			if (is_same(var, v))
+			{
+				return;
+			}
+		}
+		use.insert(var);
+	}
+
 	void to_mips(std::shared_ptr<IrList> ir_list, std::shared_ptr<SymbolTable> global_table_t)
 	{
+		used_temp.resize(ir_list->size());
+		for (int i = ir_list->size() - 1; i >= 0; i--)
+		{
+			auto &code_t = (*ir_list)[i];
+			switch (code_t->ir_type)
+			{
+				case ir_assign:
+				{
+					auto code = std::static_pointer_cast<IrAssign>(code_t);
+					get_use_temp(used_temp[i], code->l);
+					if (code->r)
+					{
+						get_use_temp(used_temp[i], code->r);
+					}
+					get_use_temp(used_temp[i], code->aim);
+					break;
+				}
+				case ir_call:
+				{
+					auto code = std::static_pointer_cast<IrCall>(code_t);
+					for (auto var : code->vars)
+					{
+						get_use_temp(used_temp[i], var);
+					}
+					break;
+				}
+				case ir_ret:
+				{
+					auto code = std::static_pointer_cast<IrRet>(code_t);
+					if (!code->is_void)
+					{
+						get_use_temp(used_temp[i], code->var);
+					}
+					break;
+				}
+				case ir_branch:
+				{
+					auto code = std::static_pointer_cast<IrBranch>(code_t);
+					get_use_temp(used_temp[i], code->var);
+					break;
+				}
+				case ir_jump:
+				{
+					auto code = std::static_pointer_cast<IrJump>(code_t);
+					break;
+				}
+				case ir_label:
+				{
+					auto code = std::static_pointer_cast<IrLable>(code_t);
+					break;
+				}
+				case ir_func:
+				{
+					auto code = std::static_pointer_cast<IrFunc>(code_t);
+					for (auto var_s : *(code->par_list))
+					{
+						get_use_temp(used_temp[i], std::make_shared<NorVar>(code->symbol_table->find(var_s)));
+					}
+					break;
+				}
+				case ir_write:
+				{
+					auto code = std::static_pointer_cast<IrWrite>(code_t);
+					get_use_temp(used_temp[i], code->var);
+					break;
+				}
+				case ir_read:
+				{
+					auto code = std::static_pointer_cast<IrRead>(code_t);
+					get_use_temp(used_temp[i], code->var);
+					break;
+				}
+				case ir_func_end:
+				{
+					auto code = std::static_pointer_cast<IrFuncEnd>(code_t);
+					break;
+				}
+			}
+			if (i > 0)
+			{
+				used_temp[i - 1] = used_temp[i];
+			}
+		}
 		global_table = global_table_t;
 		mips_output_stream << ".data" << std::endl;
 		for (auto e : global_table->get_table())
@@ -351,6 +478,7 @@ namespace ucc
 		mips_output_stream << "syscall" << std::endl;
 		for (auto ir_it = ir_list->begin(); ir_it != ir_list->end(); ir_it++)
 		{
+			cur_ir_line = ir_it - ir_list->begin();
 			auto ir_t = *ir_it;
 			switch (ir_t->ir_type)
 			{
@@ -573,7 +701,7 @@ namespace ucc
 					cur_stack_size = 0;
 					cur_stack_size += 4;
 					cur_func_codes->codes << "sw $ra, -4($sp)" << std::endl;
-					for (auto e : ir->symbol_table->get_table())
+					for (auto &e : ir->symbol_table->get_table())
 					{
 						auto entry = e.second;
 						if (entry->type == SymbolType::varible)
