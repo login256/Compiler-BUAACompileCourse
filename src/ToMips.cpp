@@ -166,7 +166,7 @@ namespace ucc
 		}
 	}
 
-	static std::vector<int> general_reg = {$s0, $s1, $s2, $s3, $s4, $s5, $s6, $s7};
+	static std::vector<int> general_reg = {$s0, $s1, $s2, $s3, $s4, $s5, $s6, $s7, $k0, $k1, $gp, $s8};
 	static std::vector<int> temp_reg = {$t0, $t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $t9};
 	static std::vector<int> use_seq;
 	static bool dirty[32];
