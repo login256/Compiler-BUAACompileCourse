@@ -171,6 +171,18 @@ namespace ucc
 	static std::vector<int> use_seq;
 	static bool dirty[32];
 
+	bool is_temp(int u)
+	{
+		for (int i : temp_reg)
+		{
+			if (i == u)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void put_back(int w)
 	{
 		busy[w] = false;
@@ -207,7 +219,19 @@ namespace ucc
 						break;
 					}
 				}
-				use_seq.push_back(i);
+				bool in = false;
+				for (int v : temp_reg)
+				{
+					if (i == v)
+					{
+						in = true;
+						break;
+					}
+				}
+				if (in)
+				{
+					use_seq.push_back(i);
+				}
 				return i;
 			}
 		}
@@ -288,7 +312,7 @@ namespace ucc
 			auto entry = e.second;
 			if (entry->type == SymbolType::varible)
 			{
-				if (entry->attributes.size() >= 1) //?
+				if (entry->attributes.find(SymbolAttribute::att_const) != entry->attributes.end())
 				{
 					mips_output_stream << entry->id << ": .word " << entry->init_value << std::endl;
 				}
@@ -477,6 +501,10 @@ namespace ucc
 						cur_func_codes->codes << "move $v0, $" << reg << std::endl;
 					}
 					temp_put_back();
+					for (int i = 0; i < cur_func_use_s.size(); i++)
+					{
+						cur_func_codes->codes << "lw $" << $s0 + i << ", " << i * 4 << "($sp)" << std::endl;
+					}
 					cur_func_codes->codes << "addiu $sp, $sp, " << cur_stack_size << std::endl;
 					cur_func_codes->codes << "lw $ra, -4($sp)" << std::endl;
 					cur_func_codes->codes << "jr $ra" << std::endl;
@@ -488,15 +516,19 @@ namespace ucc
 					auto ir = std::static_pointer_cast<IrBranch>(ir_t);
 					temp_put_back();
 					int reg = need(ir->var, true);
-					cur_func_codes->codes << "move $v1, $" << reg << std::endl;
+					if (is_temp(reg))
+					{
+						cur_func_codes->codes << "move $v1, $" << reg << std::endl;
+						reg = $v1;
+					}
 					temp_put_back();
 					if (ir->is_true)
 					{
-						cur_func_codes->codes << "bnez $" << $v1 << ", __LABEL$" << ir->label->id << std::endl;
+						cur_func_codes->codes << "bnez $" << reg << ", __LABEL$" << ir->label->id << std::endl;
 					}
 					else
 					{
-						cur_func_codes->codes << "beqz $" << $v1 << ", __LABEL$" << ir->label->id << std::endl;
+						cur_func_codes->codes << "beqz $" << reg << ", __LABEL$" << ir->label->id << std::endl;
 					}
 					break;
 				}
@@ -578,13 +610,29 @@ namespace ucc
 							}
 						}
 					}
+					int cnt = 0;
+					for (auto e : ir->symbol_table->get_table())
+					{
+						auto &entry = e.second;
+						if (cnt < general_reg.size() && entry->attributes.find(SymbolAttribute::att_register) != entry->attributes.end())
+						{
+							occ_var[$s0 + cnt] = std::make_shared<NorVar>(entry);
+							cur_func_use_s.push_back(cnt);
+							cnt++;
+							cur_stack_size += 4;
+						}
+					}
 					cur_func_codes->codes << "addiu $sp, $sp, -" << cur_stack_size << std::endl;
+					for (int i = 0; i < cur_func_use_s.size(); i++)
+					{
+						cur_func_codes->codes << "sw $" << $s0 + i << ", " << i * 4 << "($sp)" << std::endl;
+					}
 					for (auto e : ir->symbol_table->get_table())
 					{
 						auto entry = e.second;
 						if (entry->type == SymbolType::varible)
 						{
-							if (entry->attributes.size() >= 1) //?
+							if (entry->attributes.find(SymbolAttribute::att_const) != entry->attributes.end())
 							{
 								int to_sp = cur_stack_size - entry->address;
 								cur_func_codes->codes << "li $v1, " << entry->init_value << std::endl;
@@ -657,6 +705,10 @@ namespace ucc
 				case ir_func_end:
 				{
 					all_put_back();
+					for (int i = 0; i < cur_func_use_s.size(); i++)
+					{
+						cur_func_codes->codes << "lw $" << $s0 + i << ", " << i * 4 << "($sp)" << std::endl;
+					}
 					cur_func_codes->codes << "addiu $sp, $sp, " << cur_stack_size << std::endl;
 					cur_func_codes->codes << "lw $ra, -4($sp)" << std::endl;
 					cur_func_codes->codes << "jr $ra" << std::endl;

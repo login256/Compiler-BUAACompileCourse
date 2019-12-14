@@ -163,7 +163,7 @@ namespace ucc
 		os << ")" << std::endl;
 		for (auto e : symbol_table->get_table())
 		{
-			if (e.second->attributes.size() > 0) //?
+			if (e.second->attributes.find(SymbolAttribute::att_const) != e.second->attributes.end())
 			{
 				os << "var const " << e.first << " = " << e.second->init_value << std::endl;
 			}

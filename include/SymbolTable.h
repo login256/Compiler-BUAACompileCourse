@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <memory>
 #include <unordered_map>
 
@@ -29,6 +30,7 @@ namespace ucc
 	enum SymbolAttribute
 	{
 		att_const,
+		att_register,
 	};
 
 	enum SymbolScope
@@ -44,7 +46,7 @@ namespace ucc
 		SymbolData data;
 		SymbolScope scope;
 		int size;
-		std::vector<SymbolAttribute> attributes;
+		std::set<SymbolAttribute> attributes;
 
 		int init_value;
 
@@ -52,7 +54,7 @@ namespace ucc
 
 		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size, SymbolScope scope);
 
-		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size, const std::vector<SymbolAttribute> &attributes,
+		SymbolTableEntry(std::string id, SymbolType type, SymbolData data, int size, const std::set<SymbolAttribute> &attributes,
 						 SymbolScope scope);
 	};
 

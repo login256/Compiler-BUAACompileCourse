@@ -1100,6 +1100,7 @@ namespace ucc
 				MUST_BE(TokenType::token_lpar);
 				auto id = parse_id();
 				auto entry = cur_symbol_table->find(id);
+				entry->attributes.insert(SymbolAttribute::att_register);
 				std::shared_ptr<Var> l_val;
 				l_val = std::make_shared<NorVar>(entry);
 				MUST_BE(TokenType::token_ass);
