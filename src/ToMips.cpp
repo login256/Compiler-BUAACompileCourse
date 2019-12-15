@@ -167,7 +167,7 @@ namespace ucc
 		}
 	}
 
-	static std::vector<int> general_reg = {$s0, $s1, $s2, $s3, $s4, $s5, $s6, $s7, $k0, $k1, $gp, $s8};
+	static std::vector<int> general_reg = {$s0, $s1, $s2, $s3, $s4, $s5, $s6, $s7};
 	static std::vector<int> temp_reg = {$t0, $t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $t9};
 	static std::vector<int> use_seq;
 	static bool dirty[32];
@@ -319,6 +319,13 @@ namespace ucc
 	{
 		for (int i : temp_reg)
 		{
+			if (occ_var[i] != nullptr && occ_var[i]->var_type == VarType::var_array)
+			{
+				put_back(i);
+			}
+		}
+		for (int i : temp_reg)
+		{
 			if (occ_var[i] != nullptr)
 			{
 				put_back(i);
@@ -328,6 +335,13 @@ namespace ucc
 
 	inline void all_put_back()
 	{
+		for (int i = 0; i < 32; i++)
+		{
+			if (occ_var[i] != nullptr && occ_var[i]->var_type == VarType::var_array)
+			{
+				put_back(i);
+			}
+		}
 		for (int i = 0; i < 32; i++)
 		{
 			if (occ_var[i] != nullptr)
@@ -348,13 +362,6 @@ namespace ucc
 		if (var->var_type != VarType::var_temp)
 		{
 			return;
-		}
-		for (auto v : use)
-		{
-			if (is_same(var, v))
-			{
-				return;
-			}
 		}
 		use.insert(var);
 	}
@@ -749,7 +756,13 @@ namespace ucc
 							}
 						}
 					}
-					int cnt = 0;
+					int cnt = 0;for (int i = 0; i < ir->par_list->size(); i++)
+					{
+						if (i < 4)
+						{
+							occ_var[$a0 + i] = std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]));
+						}
+					}
 					for (auto e : ir->symbol_table->get_table())
 					{
 						auto &entry = e.second;
@@ -765,22 +778,10 @@ namespace ucc
 							}
 						}
 					}
-					for (int i = 0; i < ir->par_list->size(); i++)
-					{
-						if (i < 4)
-						{
-							occ_var[$a0 + i] = std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]));
-							dirty[$a0 + i] = true;
-							//int reg = need(std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i])), false);
-							//cur_func_codes->codes << "move $" << reg << ", $" << $a0 + i << std::endl;
-							//dirty[reg] = true;
-							//save_to($a0 + i, std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]))); // 4 is $a0
-						}
-					}
 					for (auto e : ir->symbol_table->get_table())
 					{
 						auto &entry = e.second;
-						if (cnt < general_reg.size() && entry->type == SymbolType::varible)
+						if (cnt < general_reg.size() && entry->type == SymbolType::varible &&entry->attributes.find(SymbolAttribute::att_const) == entry->attributes.end())
 						{
 							auto var = std::make_shared<NorVar>(entry);
 							if (!has_in(var))
@@ -812,7 +813,11 @@ namespace ucc
 					}
 					for (int i = 0; i < ir->par_list->size(); i++)
 					{
-						if (i >= 4)
+						if (i < 4)
+						{
+							//occ_var[$a0 + i] = std::make_shared<NorVar>(ir->symbol_table->find((*ir->par_list)[i]));
+						}
+						else
 						{
 							int to_sp = cur_stack_size + i * 4;
 							cur_func_codes->codes << "lw $v1, " << to_sp << "($sp)" << std::endl;
