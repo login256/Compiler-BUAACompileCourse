@@ -1199,6 +1199,7 @@ namespace ucc
 
 	void Parser::parse_par_value_list(std::shared_ptr<IrCall> ir)
 	{
+		auto cur_args = ErrorData::cur_func_args;
 		int cnt = 0;
 		switch (buffer.front()->get_type())
 		{
@@ -1216,7 +1217,7 @@ namespace ucc
 						parse_exp(curt);
 				ir->vars.push_back(curt);
 #ifdef SEMANTICERROR
-				if (cnt < ErrorData::cur_func_args.size() && exp_type != ErrorData::cur_func_args[cnt])
+				if (cnt < cur_args.size() && exp_type != cur_args[cnt])
 				{
 					error_handler(Error(ErrorType::func_type_bad, buffer.get_last()->get_line()));
 				}
@@ -1231,7 +1232,7 @@ namespace ucc
 							parse_exp(curt);
 					ir->vars.push_back(curt);
 #ifdef SEMANTICERROR
-					if (cnt < ErrorData::cur_func_args.size() && exp_type != ErrorData::cur_func_args[cnt])
+					if (cnt < cur_args.size() && exp_type != cur_args[cnt])
 					{
 						error_handler(Error(ErrorType::func_type_bad, buffer.get_last()->get_line()));
 					}
@@ -1243,7 +1244,7 @@ namespace ucc
 			default:
 				break;
 		}
-		if (cnt != ErrorData::cur_func_args.size())
+		if (cnt != cur_args.size())
 		{
 			error_handler(Error(ErrorType::func_arg_bad, buffer.get_last()->get_line()));
 		}
