@@ -1,6 +1,6 @@
-#include "include/homework/generate_homework.h"
+#include "include/homework/final.h"
 
 int main(int argc, char **args)
 {
-	generate_homework::generate_main();
+	final_homework::final_main();
 }

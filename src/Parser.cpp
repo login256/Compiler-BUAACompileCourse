@@ -240,9 +240,10 @@ namespace ucc
 		{
 			parse_const_declare(SymbolScope::scope_global);
 		}
-		if (buffer.at(2)->get_type() == TokenType::token_comma ||
-			buffer.at(2)->get_type() == TokenType::token_lbrackets ||
-			buffer.at(2)->get_type() == TokenType::token_semi)
+//		if (buffer.at(2)->get_type() == TokenType::token_comma ||
+//			buffer.at(2)->get_type() == TokenType::token_lbrackets ||
+//			buffer.at(2)->get_type() == TokenType::token_semi)
+		if (buffer.at(2)->get_type() != TokenType::token_lpar)
 		{
 			parse_var_declare(SymbolScope::scope_global);
 		}
@@ -269,12 +270,14 @@ namespace ucc
 	{
 		MUST_BE(TokenType::token_const);
 		parse_const_define(scope);
-		MUST_BE(TokenType::token_semi);
+		//MUST_BE(TokenType::token_semi);
+		must_and_error(TokenType::token_semi, ErrorType::should_be_semi, true);
 		while (IS_TOKEN(TokenType::token_const))
 		{
 			get_next();
 			parse_const_define(scope);
-			MUST_BE(TokenType::token_semi);
+			//MUST_BE(TokenType::token_semi);
+			must_and_error(TokenType::token_semi, ErrorType::should_be_semi, true);
 		}
 		output(SyntaxType::syntax_const_declare);
 	}
@@ -454,12 +457,14 @@ namespace ucc
 	void Parser::parse_var_declare(SymbolScope scope)
 	{
 		parse_var_define(scope);
-		MUST_BE(TokenType::token_semi);
+		//MUST_BE(TokenType::token_semi);
+		must_and_error(TokenType::token_semi, ErrorType::should_be_semi, true);
 		while ((IS_TOKEN(TokenType::token_int) || IS_TOKEN(TokenType::token_char)) &&
 			   buffer.at(2)->get_type() != TokenType::token_lpar)
 		{
 			parse_var_define(scope);
-			MUST_BE(TokenType::token_semi);
+			//MUST_BE(TokenType::token_semi);
+			must_and_error(TokenType::token_semi, ErrorType::should_be_semi, true);
 		}
 		output(SyntaxType::syntax_var_declare);
 	}
@@ -1107,12 +1112,14 @@ namespace ucc
 				std::shared_ptr<Var> r_val;
 				parse_exp(r_val);
 				ir_list->push_back(std::make_shared<IrAssign>(IrOp::op_add, r_val, l_val));
-				MUST_BE(TokenType::token_semi);
+				//MUST_BE(TokenType::token_semi);
+				must_and_error(TokenType::token_semi, ErrorType::should_be_semi, true);
 				ir_list->push_back(std::make_shared<IrLable>(label_begin));
 				std::shared_ptr<Var> con_var;
 				parse_con(con_var);
 				ir_list->push_back(std::make_shared<IrBranch>(false, con_var, label_end));
-				MUST_BE(TokenType::token_semi);
+				//MUST_BE(TokenType::token_semi);
+				must_and_error(TokenType::token_semi, ErrorType::should_be_semi, true);
 				auto id1 = parse_id();
 				MUST_BE(TokenType::token_ass);
 				auto id2 = parse_id();
@@ -1160,7 +1167,7 @@ namespace ucc
 	{
 		auto cur_id = parse_id();
 		auto entryp = cur_symbol_table->find(cur_id);
-		auto cur_ir = std::make_shared<IrCall>(entryp->id);
+		auto cur_ir = std::make_shared<IrCall>(entryp ? entryp->id : "");
 		if (!entryp)
 		{
 			error_handler(Error(ErrorType::undefined_id, buffer.get_last()->get_line()));
@@ -1180,7 +1187,7 @@ namespace ucc
 		parse_par_value_list(cur_ir);
 		ir_list->push_back(cur_ir);
 		must_and_error(TokenType::token_rpar, ErrorType::should_be_rpar, false);
-		if (entryp->data == SymbolData::data_void)
+		if (entryp && entryp->data == SymbolData::data_void)
 		{
 			output_func(true);
 		}

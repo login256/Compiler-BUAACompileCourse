@@ -41,6 +41,11 @@ static std::map<ErrorType, std::string> ErrorToString = {
 
 static std::set<Error> errors;
 
+bool ucc::has_error()
+{
+	return !errors.empty();
+}
+
 class res_to_token;
 
 std::ofstream &ucc::operator<<(std::ofstream &os, const Error &error)

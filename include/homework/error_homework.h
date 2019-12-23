@@ -30,6 +30,8 @@ namespace ucc
 	void error_handler(Error error);
 
 	void print_errors(std::ofstream &error_file);
+
+	bool has_error();
 }
 
 int error_main();
