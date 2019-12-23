@@ -688,6 +688,15 @@ namespace ucc
 
 	void Parser::parse_main_func()
 	{
+#ifdef SEMANTICERROR
+		ErrorData::has_void_return = false;
+		ErrorData::has_char_return = false;
+		ErrorData::has_int_return = false;
+		int line = buffer.front()->get_line();
+#endif
+#ifdef SEMANTICERROR
+		ErrorData::cur_func_data_type = SymbolData::data_void;
+#endif
 		MUST_BE(TokenType::token_void);
 		MUST_BE(TokenType::token_main);
 		cur_symbol_table = std::make_shared<SymbolTable>(cur_symbol_table);
