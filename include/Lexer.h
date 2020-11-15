@@ -25,6 +25,7 @@ namespace ucc
 		std::string::const_iterator cur_pos_it;
 		int cur_line;
 		int cur_col;
+		inline void next_pos();
 
 	public:
 		Lexer(

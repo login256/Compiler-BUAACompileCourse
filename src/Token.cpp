@@ -6,20 +6,19 @@
 
 namespace ucc
 {
-	Token::Token(TokenType type) : type(type) {}
-
-	void Token::set_type(TokenType type)
-	{
-		Token::type = type;
-	}
-
+	Token::Token(TokenType type, int line) : type(type), line(line) {}
 
 	TokenType Token::get_type() const
 	{
 		return type;
 	}
 
-	NumToken::NumToken(int value) : Token(TokenType::token_number), value(value) {}
+	int Token::get_line() const
+	{
+		return line;
+	}
+
+	NumToken::NumToken(int line, int value) : Token(TokenType::token_number, line), value(value) {}
 
 	int NumToken::get_value() const
 	{
@@ -31,7 +30,7 @@ namespace ucc
 		NumToken::value = value;
 	}
 
-	CharToken::CharToken(std::string value) : Token(TokenType::token_cchar)
+	CharToken::CharToken(int line, std::string value) : Token(TokenType::token_cchar, line)
 	{
 		CharToken::value = std::move(value);
 	}
@@ -46,7 +45,7 @@ namespace ucc
 		CharToken::value = value;
 	}
 
-	IdToken::IdToken(std::string value) : Token(TokenType::token_id)
+	IdToken::IdToken(int line, std::string value) : Token(TokenType::token_id, line)
 	{
 		IdToken::value = std::move(value);
 	}
@@ -61,7 +60,7 @@ namespace ucc
 		IdToken::value = value;
 	}
 
-	StringToken::StringToken(std::string value) : Token(TokenType::token_cstring)
+	StringToken::StringToken(int line, std::string value) : Token(TokenType::token_cstring, line)
 	{
 		StringToken::value = std::move(value);
 	}
@@ -76,7 +75,7 @@ namespace ucc
 		StringToken::value = value;
 	}
 
-	NormalToken::NormalToken(TokenType token_type, std::string value) : Token(token_type)
+	NormalToken::NormalToken(TokenType token_type, int line, std::string value) : Token(token_type, line)
 	{
 		NormalToken::value = std::move(value);
 	}

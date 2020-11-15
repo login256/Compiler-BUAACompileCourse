@@ -20,11 +20,16 @@ private:
 public:
 	HomeworkGrammerOutputer(std::ostream &output_stream);
 
-	virtual void syntax_unit_output(ucc::SyntaxType type);
+	virtual void syntax_unit_output(ucc::SyntaxType type) override;
 
-	virtual void syntax_func_fucking_output(bool is_void);
+	virtual void syntax_func_fucking_output(bool is_void) override;
 
-	void token_output(std::shared_ptr<ucc::Token> token) override;
+	virtual void token_output(std::shared_ptr<ucc::Token> token) override;
 };
+
+namespace syntactic_homework
+{
+	int syntactic_main();
+}
 
 #endif //UNIVERSALCOMPILER_SYNTACTIC_HOMEWORK_H
